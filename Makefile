@@ -24,11 +24,11 @@ OBJ = $(SRC:$(SPATH)%.c=$(OPATH)%.o)
 
 NAME = RTv1
 
-CRFLAGS = -O2 -I./inc -c
+CRFLAGS = -Wall -Wextra -Werror -O2 -I./inc -c
 
 CDFLAGS = -g -O0 -I./inc -c
 
-LFLAGS = -lm -lSDL2 -lOpenCL -lpthread -o $(NAME)
+LFLAGS = -lm -lSDL2 -lOpenCL -lpthread -L./lib -lft -o $(NAME)
 
 MODE = RELEASE
 

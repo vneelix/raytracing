@@ -17,13 +17,6 @@
 ** structs
 */
 
-typedef struct	s_attr{
-	cl_float3	color;
-	cl_float	shine;
-	cl_float	reflect;
-	cl_float	refract;
-}				t_attr;
-
 typedef struct	s_point{
 	double		x;
 	double		y;

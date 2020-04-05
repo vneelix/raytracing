@@ -6,7 +6,7 @@ int		sdl_init(t_sdl *sdl)
 		return (-1);
 	if ((sdl->win = SDL_CreateWindow("RTv1",
 		SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-			W, H, SDL_WINDOW_SHOWN)) == NULL)
+			W, H, SDL_WINDOW_SHOWN | SDL_WINDOW_INPUT_GRABBED)) == NULL)
 	{
 		SDL_Quit();
 		return (-1);
@@ -30,33 +30,36 @@ void	correct_queue(void)
 	SDL_EventState(SDL_MOUSEMOTION, SDL_ENABLE);
 }
 
-int		sdl_keyhook(SDL_KeyCode key, t_rt *rt)
+int		sdl_keyhook(SDL_Keycode key, t_rt *rt)
 {
+	SDL_Keycode available_keys = SDLK_UP | SDLK_DOWN | SDLK_LEFT | SDLK_RIGHT;
+
 	if (key == SDLK_UP)
-		(rt->sph + 0)->center.z += S;
+		(rt->opt.center.s)[2] += 1;
 	else if (key == SDLK_DOWN)
-		(rt->sph + 0)->center.z -= S;
+		(rt->opt.center.s)[2] -= 1;
 	else if (key == SDLK_LEFT)
-		(rt->sph + 0)->center.x -= S;
+		(rt->opt.center.s)[0] -= 1;
 	else if (key == SDLK_RIGHT)
-		(rt->sph + 0)->center.x += S;
-	else if (key == SDLK_RSHIFT)
-		(rt->sph + 0)->center.y += S;
-	else if (key == SDLK_RETURN)
-		(rt->sph + 0)->center.y -= S;
-	else
-		return (0);
-	if (key == SDLK_UP || key == SDLK_DOWN
-		|| key == SDLK_LEFT || key == SDLK_RIGHT
-			|| key == SDLK_RSHIFT || key == SDLK_RETURN)
-		thread_manager(rt);
+		(rt->opt.center.s)[0] += 1;
+	if (key & available_keys)
+		return (1);
 	return (0);
+}
+
+int		sdl_mousehook(t_sdl *sdl, t_rt *rt)
+{
+	rt->opt.spin_y += atanf(0.05 * sdl->event.motion.xrel) * 180.f / CL_M_PI;
+	rt->opt.spin_x -= atanf(0.05 * sdl->event.motion.yrel) * 180.f / CL_M_PI;
+	return (1);
 }
 
 int		sdl_loop(t_sdl *sdl, t_rt *rt)
 {
+	int	ret;
 	int	quit;
 
+	ret = 0;
 	quit = 0;
 	while (quit == 0)
 	{
@@ -66,11 +69,17 @@ int		sdl_loop(t_sdl *sdl, t_rt *rt)
 				|| (sdl->event.key.type == SDL_KEYUP
 					&& sdl->event.key.keysym.sym == SDLK_ESCAPE))
 			{
-				mem_free(rt);
 				quit = 1;
 			}
-			if (sdl->event.key.type == SDL_KEYDOWN)
-				sdl_keyhook(sdl->event.key.keysym.sym, rt);
+			else if (sdl->event.type == SDL_KEYDOWN)
+				ret = sdl_keyhook(sdl->event.key.keysym.sym, rt);
+			/*else if (sdl->event.type == SDL_MOUSEMOTION)
+				ret = sdl_mousehook(sdl, rt);*/
+			if (ret)
+			{
+				ret = opencl_launch(&(rt->cl), rt);
+				SDL_UpdateWindowSurface(rt->sdl.win);
+			}
 			correct_queue();
 		}
 	}

@@ -1,53 +1,39 @@
 #include "rtv1.h"
 
-void		create_items(t_illum *illum, t_item *item)
-{
-	illum[0] = (t_illum){(cl_float)(0.6), (cl_float3){0, 0, 0}};
-	item[0] = (t_item){(t_pref){
-		(cl_float3){0, 10, 50}, (cl_float3){0, -1, 0}, (cl_float){0}, (cl_float)(0)},
-			(t_attr){(cl_float3){0, 0, 255}, (cl_float){5000},
-				(cl_float){0}, (cl_float){0}}, 0};
-}
-
-cl_int		opencl_memobj(t_opencl *cl, void *arg)
+cl_int		opencl_memobj(t_opencl *cl, t_rt *rt)
 {
 	cl_int	ret;
 	size_t	size;
 
-	//
-	t_illum *illum = malloc(sizeof(t_illum) * 1);
-	t_item	*item = malloc(sizeof(t_item) * 1);
-	create_items(illum, item);
-	//
 	size = 96 * 1024 * 1024;
 	(cl->memobj)[0] = clCreateBuffer(cl->context, CL_MEM_READ_WRITE, size, NULL, &ret);
-	size = sizeof(t_illum) * 1;
+	size = sizeof(t_item) * rt->opt.illu_c;
 	(cl->memobj)[1] = clCreateBuffer(cl->context, CL_MEM_READ_ONLY, size, NULL, &ret);
 	ret = clEnqueueWriteBuffer(cl->command_queue, (cl->memobj)[1],
-		CL_TRUE, 0, size, illum, 0, NULL, NULL);
-	size = sizeof(t_item) * 1;
+		CL_TRUE, 0, size, rt->illu, 0, NULL, NULL);
+	size = sizeof(t_item) * rt->opt.item_c;
 	(cl->memobj)[2] = clCreateBuffer(cl->context, CL_MEM_READ_ONLY, size, NULL, &ret);
 	ret = clEnqueueWriteBuffer(cl->command_queue, (cl->memobj)[2],
-		CL_TRUE, 0, size, item, 0, NULL, NULL);
+		CL_TRUE, 0, size, rt->item, 0, NULL, NULL);
 	if (ret)
 		return (ret);
 	return (0);
 }
 
-cl_int		opencl_lauch(t_opencl *cl, void *arg)
+cl_int		opencl_launch(t_opencl *cl, t_rt *rt)
 {
 	cl_int	ret;
-	size_t	work_size[1] = {800 * 800};
+	size_t	work_size;
 
+	work_size = rt->opt.w * rt->opt.h;
 	ret = clSetKernelArg(cl->kernel, 0, sizeof(cl_mem), cl->memobj);
 	ret = clSetKernelArg(cl->kernel, 1, sizeof(cl_mem), cl->memobj + 1);
 	ret = clSetKernelArg(cl->kernel, 2, sizeof(cl_mem), cl->memobj + 2);
-	t_opt options = (t_opt){800, 800, 1, 1};
-	ret = clSetKernelArg(cl->kernel, 3, sizeof(t_opt), &options);
+	ret = clSetKernelArg(cl->kernel, 3, sizeof(t_opt), &(rt->opt));
 	ret = clEnqueueNDRangeKernel(cl->command_queue,
-		cl->kernel, 1, NULL, work_size, NULL, 0, NULL, NULL);
+		cl->kernel, 1, NULL, &(work_size), NULL, 0, NULL, NULL);
 	ret = clEnqueueReadBuffer(cl->command_queue, (cl->memobj)[0], CL_TRUE, 0,
-		800 * 800 * 4, ((t_sdl*)(arg))->surf->pixels, 0, NULL, NULL);
+		rt->opt.w * rt->opt.h * 4, rt->sdl.surf->pixels, 0, NULL, NULL);
 	return (0);
 }
 
@@ -72,7 +58,7 @@ cl_int		opencl_program(t_opencl *cl, char **sources, cl_uint count)
 	return (0);
 }
 
-cl_int		opencl_init(t_opencl *cl, char **sources, cl_uint count, void *arg)
+cl_int		opencl_init(t_opencl *cl, char **sources, cl_uint count, t_rt *rt)
 {
 	cl_int	ret;
 	cl_uint	num;
@@ -89,9 +75,9 @@ cl_int		opencl_init(t_opencl *cl, char **sources, cl_uint count, void *arg)
 		return (ret);
 	if ((ret = opencl_program(cl, sources, count)))
 		return (ret);
-	if ((ret = opencl_memobj(cl ,arg)))
+	if ((ret = opencl_memobj(cl ,rt)))
 		return (ret);
-	if ((ret = opencl_lauch(cl, arg)))
+	if ((ret = opencl_launch(cl, rt)))
 		return (ret);
 	return (0);
 }

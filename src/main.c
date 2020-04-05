@@ -37,31 +37,38 @@ void*		opencl_scan(char **files, cl_uint count)
 	{
 		i -= (i != 0 ? 1 : 0);
 		while (i > 0)
-			free(files[i--]);
-		free(files[i--]);
-		free(files);
+			free(sources[i--]);
+		free(sources[i]);
+		free(sources);
 	}
 	return (sources);
 }
 
-cl_int		opencl_init(t_opencl *cl, char **sources, cl_uint count, void *arg);
-int			get_scene(char *file_name);
-
 int				main(void)
 {
 	t_rt	*rt;
-	cl_uint	count = 5;
-	char	*files[] = {"main_func.cl", "plane.cl", "sphere.cl", "cylinder.cl", "cone.cl"};
+	cl_uint	count = 6;
+	char	*files[] = {"main_func.cl", "plane.cl", "sphere.cl", "cylinder.cl", "cone.cl", "func.cl"};
 	char	**sources;
 
-	get_scene("file");
-	/*rt = malloc(sizeof(t_rt));
+	rt = malloc(sizeof(t_rt));
+	ft_bzero(rt, sizeof(t_rt));
+	if (get_scene(rt, "file"))
+	{
+		printf("Scene file error\n");
+		return (-1);
+	}
 	if (sdl_init(&(rt->sdl)))
 		return (-1);
-	sources = (char**)(opencl_scan(files, count));
-	if (opencl_init(&rt->cl, sources, count, &(rt->sdl)))
+	//SDL_ShowCursor(SDL_DISABLE);
+	SDL_SetRelativeMouseMode(SDL_ENABLE);
+	rt->opt.w = rt->sdl.surf->w;
+	rt->opt.h = rt->sdl.surf->h;
+	rt->opt.center = (cl_float3){0, 0, 0};
+	sources = opencl_scan(files, count);
+	if (opencl_init(&(rt->cl), sources, count, rt))
 		return (-1);
 	SDL_UpdateWindowSurface(rt->sdl.win);
-	sdl_loop(&(rt->sdl), rt);*/
+	sdl_loop(&(rt->sdl), rt);
 	return (0);
 }

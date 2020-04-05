@@ -1,4 +1,18 @@
 illum{
-	ratio 0.8,
-	center (0, 0, 0)
+	k 0.6
+	center (0, -10, 30)
+}
+
+plane{
+	shine 5000
+	rgb (0, 0, 255)
+	center (0, 10, 30)
+	vector (0, -1, 0)
+}
+
+sphere{
+	shine 5000
+	rgb (90, 10, 75)
+	center (0, -5, 50)
+	radius 10
 }

@@ -1,32 +1,31 @@
-struct __attribute__ ((aligned)) pref{
-	float3		center;
-	float3		vector;
-	float		radius;
-	float		min;
-	float		max;
-	float		k;
+struct __attribute__ ((packed)) pref{
+	float3	center;
+	float3	vector;
+	float	radius;
+	float	min;
+	float	max;
+	float	k;
 };
-struct __attribute__ ((aligned)) attr{
-	float3		color;
-	float		shine;
-	float		reflect;
-	float		refract;
+struct __attribute__ ((packed)) attr{
+	float3	color;
+	float	shine;
+	float	reflect;
+	float	refract;
 };
-struct __attribute__ ((aligned)) item{
+struct __attribute__ ((packed)) item{
 	struct pref	pref;
 	struct attr	attr;
 	int			type;
 };
-struct __attribute__ ((aligned)) illum{
-	float		ratio;
-	float3		center;
-};
 
-struct __attribute__ ((aligned)) opt{
-	int			w;
-	int			h;
-	int			illum_c;
-	int			item_c;
+struct __attribute__ ((packed)) opt{
+	int		w;
+	int		h;
+	int		illu_c;
+	int		item_c;
+	float	spin_x;
+	float	spin_y;
+	float3	center;
 };
 
 float	plane(__global struct item *item, float3 center, float3 direct);
@@ -35,6 +34,8 @@ float	cylinder(__global struct item *item, float3 center, float3 direct);
 float3	cylinder_normal(__global struct item *item, float3 point, float3 center, float3 direct, float t);
 float	cone(__global struct item *item, float3 center, float3 direct);
 float3	cone_normal(__global struct item *item, float3 point, float3 center, float3 direct, float t);
+float3	rotation_x(float rad, float3 vec);
+float3	rotation_y(float rad, float3 vec);
 
 float	scalar_multiple(float3 a, float3 b)
 {
@@ -105,28 +106,30 @@ uint	rgb_to_uint(float3 rgb, float diffuse, float shine)
 	return (color);
 }
 
-uint	calc_light(__global struct illum *illum, __global struct item *item, struct opt opt, float3 center, float3 direct, float t)
+uint	calc_light(__global struct item *illu, __global struct item *item,
+		int item_num, struct opt opt, float3 center, float3 direct, float t)
 {
-	int			i = -1;
-	float3		point, normal, illum_vec;
-	float		diffuse = 0.03, shine = 0, ratio;
+	int			i = 0;
+	float3		point, normal, illu_vec;
+	float		diffuse = 0.06, shine = 0, ratio;
 
 	point = center + direct * t;
-	normal = get_normal(item, point, center, direct, t);
-	while ((++i) < opt.illum_c)
+	normal = get_normal(item + item_num, point, center, direct, t);
+	while (i < opt.illu_c)
 	{
-		illum_vec = (illum + i)->center - point;
-		if ((ratio = calc_ratio(illum_vec, normal)) > 0)
+		illu_vec = (illu + i)->pref.center - point;
+		if ((ratio = calc_ratio(illu_vec, normal)) > 0.001)
 		{
-			diffuse += (ratio * (illum + i)->ratio);
-			if ((ratio = calc_ratio(get_reflect_vec(illum_vec, normal), -direct)) > 0)
-				shine += (pow(ratio, item->attr.shine) * illum->ratio);
+			diffuse += (ratio * (illu + i)->pref.k);
+			if ((ratio = calc_ratio(get_reflect_vec(illu_vec, normal), -direct)) > 0.001)
+				shine += (pow(ratio, (item + item_num)->attr.shine) * (illu + i)->pref.k);
 		}
+		i += 1;
 	}
-	return (rgb_to_uint(item->attr.color, diffuse, shine));
+	return (rgb_to_uint((item + item_num)->attr.color, diffuse, shine));
 }
 
-uint	traceray(__global struct illum *illum, __global struct item *item, struct opt opt, float3 center, float3 direct)
+uint	traceray(__global struct item *illu, __global struct item *item, struct opt opt, float3 center, float3 direct)
 {
 	int			i, item_num;
 	float		t, t_min;
@@ -153,12 +156,12 @@ uint	traceray(__global struct illum *illum, __global struct item *item, struct o
 		i += 1;
 	}
 	if (t_min != INFINITY)
-		return (calc_light(illum, item + item_num, opt, center, direct, t_min));
+		return (calc_light(illu, item, item_num, opt, center, direct, t_min));
 	return (0);
 }
 
 __kernel void	main_func(__global uint *pixels,
-	__global struct illum *illum, __global struct item *item, struct opt opt)
+	__global struct item *illu, __global struct item *item, struct opt opt)
 {
 	int			pixel;
 	float3		point, direct;
@@ -166,7 +169,12 @@ __kernel void	main_func(__global uint *pixels,
 	pixel = get_global_id(0);
 	point = (float3){(pixel - (pixel / opt.w) * opt.w - (opt.w / 2)) * ((float)(1) / opt.w),
 		(pixel / opt.h - (opt.h / 2)) * ((float)(1) / opt.h), 1};
-	direct = normalize(point - (float3){0, 0, 0});
+	point.x += opt.center.x;
+	point.y += opt.center.y;
+	point.z += opt.center.z;
+	direct = normalize(point - opt.center);
+	direct = rotation_x(opt.spin_x * M_PI / 180.f, direct);
+	direct = rotation_y(opt.spin_y * M_PI / 180.f, direct);
 	item->pref.vector = normalize(item->pref.vector);
-	pixels[pixel] = traceray(illum, item, opt, (float3){0, 0, 0}, direct);
+	pixels[pixel] = traceray(illu, item, opt, opt.center, direct);
 }
