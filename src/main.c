@@ -49,7 +49,7 @@ int				main(void)
 	t_rt	*rt;
 	cl_uint	count = 7;
 	char	*files[] = {"main_func.cl", "plane.cl",
-		"sphere.cl", "cylinder.cl", "cone.cl", "func.cl", "paraboloid.cl"};
+		"sphere.cl", "cylinder.cl", "cone.cl", "add_func.cl", "paraboloid.cl"};
 	char	**sources;
 
 	rt = malloc(sizeof(t_rt));
@@ -61,7 +61,6 @@ int				main(void)
 	}
 	if (sdl_init(&(rt->sdl)))
 		return (-1);
-	//SDL_ShowCursor(SDL_DISABLE);
 	SDL_SetRelativeMouseMode(SDL_ENABLE);
 	rt->opt.w = rt->sdl.surf->w;
 	rt->opt.h = rt->sdl.surf->h;

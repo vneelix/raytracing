@@ -6,9 +6,16 @@ illum{
 paraboloid{
 	shine 5000
 	rgb (0, 0, 255)
-	center (0, 0, 30)
+	center (0, 15, 50)
 	vector (0, -1, 0)
 	max 40
 	min 20
 	k 120
+}
+
+sphere{
+	center (10, 0, 30)
+	rgb (255, 0, 0)
+	radius 5
+	shine 5000
 }

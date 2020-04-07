@@ -44,7 +44,7 @@ cl_int		opencl_program(t_opencl *cl, char **sources, cl_uint count)
 	cl->program = clCreateProgramWithSource(cl->context, count, (const char**)(sources), NULL, &ret);
 	if (ret)
 		return (ret);
-	if ((ret = clBuildProgram(cl->program, 1, &(cl->device_id), NULL, NULL, NULL)))
+	if ((ret = clBuildProgram(cl->program, 1, &(cl->device_id), "-I./", NULL, NULL)))
 	{
 		size_t log_size;
 		clGetProgramBuildInfo(cl->program, cl->device_id, CL_PROGRAM_BUILD_LOG, 0, NULL, &log_size);

@@ -1,53 +1,4 @@
-struct __attribute__ ((packed)) pref{
-	float3	center;
-	float3	vector;
-	float	radius;
-	float	min;
-	float	max;
-	float	k;
-};
-struct __attribute__ ((packed)) attr{
-	float3	color;
-	float	shine;
-	float	reflect;
-	float	refract;
-};
-struct __attribute__ ((packed)) item{
-	struct pref	pref;
-	struct attr	attr;
-	int			type;
-};
-
-struct __attribute__ ((packed)) opt{
-	int		w;
-	int		h;
-	int		illu_c;
-	int		item_c;
-	float	spin_x;
-	float	spin_y;
-	float3	center;
-};
-
-float	plane(__global struct item *item, float3 center, float3 direct);
-float	sphere(__global struct item *item, float3 center, float3 direct);
-float	cylinder(__global struct item *item, float3 center, float3 direct);
-float3	cylinder_normal(__global struct item *item, float3 point, float3 center, float3 direct, float t);
-float	cone(__global struct item *item, float3 center, float3 direct);
-float3	cone_normal(__global struct item *item, float3 point, float3 center, float3 direct, float t);
-float	paraboloid(__global struct item *item, float3 center, float3 direct);
-float3	paraboloid_normal(__global struct item *item, float3 point, float3 center, float3 direct, float t);
-float3	rotation_x(float rad, float3 vec);
-float3	rotation_y(float rad, float3 vec);
-
-float	scalar_multiple(float3 a, float3 b)
-{
-	return(a.x * b.x + a.y * b.y + a.z * b.z);
-}
-
-float	angle(float3 a, float3 b)
-{
-	return (acos(scalar_multiple(normalize(a), normalize(b))));
-}
+#include "clheader.h"
 
 float3	get_normal(__global struct item *item, float3 point, float3 center, float3 direct, float t)
 {
@@ -64,36 +15,10 @@ float3	get_normal(__global struct item *item, float3 point, float3 center, float
 	else if (item->type == 4)
 		normal = paraboloid_normal(item, point, center, direct, t);
 	else
-		normal = (float3){1, 0, 0};
-	if (scalar_multiple(normal, direct) > 0)
-		return (-normal);
+		normal = (float3){0, 0, 0};
+	if (angle(normal, direct) < M_PI_2)
+			normal *= -1;
 	return (normal);
-}
-
-float	get_rate(float a, float b)
-{
-	if (a < 0 && b < 0)
-		return (INFINITY);
-	if ((a < b && a > 0 && b > 0) || (a > b && a > 0 && b < 0))
-		return (a);
-	return (b);
-}
-
-float	calc_ratio(float3 a, float3 b)
-{
-	return (scalar_multiple(normalize(a), normalize(b)));
-}
-
-float3	get_reflect_vec(float3 vec, float3 normal)
-{
-	float		k;
-	float3		refl_vec;
-
-	k = (-1.0) / scalar_multiple(vec, normal);
-	refl_vec = vec * k;
-	refl_vec = refl_vec + normal;
-	refl_vec = normal + refl_vec;
-	return (normalize(refl_vec));
 }
 
 uint	rgb_to_uint(float3 rgb, float diffuse, float shine)
@@ -125,7 +50,7 @@ uint	calc_light(__global struct item *illu, __global struct item *item,
 		if ((ratio = calc_ratio(illu_vec, normal)) > 0.001)
 		{
 			diffuse += (ratio * (illu + i)->pref.k);
-			if ((ratio = calc_ratio(get_reflect_vec(illu_vec, normal), -direct)) > 0.001)
+			if ((ratio = calc_ratio(get_reflect_vec(-illu_vec, normal), -direct)) > 0.001)
 				shine += (pow(ratio, (item + item_num)->attr.shine) * (illu + i)->pref.k);
 		}
 		i += 1;
