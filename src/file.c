@@ -7,8 +7,10 @@ size_t	get_illum(t_item *item, char *file)
 
 	ret = 0;
 	len = ft_strlen("illum");
-	if (ft_strncmp("illum", file, len) == 0)
-		ret = len + get_item(item, file + len, ILLUM_PREF, ILLUM_REQ);
+	if (ft_strncmp("illum", file, len))
+		return (0);
+	if (!(ret = len + get_item(item, file + len, CENTER | K | RGB, CENTER | K)))
+		return (0);
 	if (item != NULL)
 		item->type = -1;
 	return (ret);
@@ -20,9 +22,9 @@ size_t	get_plane(t_item *item, char *file)
 	size_t	ret;
 
 	len = ft_strlen("plane");
-	if (ft_strncmp("plane", file, len) == 0)
-		ret = len + get_item(item, file + len, PLANE_PREF, PLANE_REQ);
-	else
+	if (ft_strncmp("plane", file, len))
+		return (0);
+	if (!(ret = len + get_item(item, file + len, PLANE_PREF, PLANE_REQ)))
 		return (0);
 	if (item != NULL)
 		item->type = 0;
@@ -35,12 +37,63 @@ size_t	get_sphere(t_item *item, char *file)
 	size_t	ret;
 
 	len = ft_strlen("sphere");
-	if (ft_strncmp("sphere", file, len) == 0)
-		ret = len + get_item(item, file + len, SPHERE_PREF, SPHERE_REQ);
-	else
+	if (ft_strncmp("sphere", file, len))
+		return (0);
+	if (!(ret = len + get_item(item, file + len, SPHERE_PREF, SPHERE_REQ)))
 		return (0);
 	if (item != NULL)
 		item->type = 1;
+	return (ret);
+}
+
+size_t	get_cylinder(t_item *item, char *file)
+{
+	size_t	len;
+	size_t	ret;
+
+	len = ft_strlen("cylinder");
+	if (ft_strncmp("cylinder", file, len))
+		return (0);
+	if (!(ret = len + get_item(item, file + len, CYLINDER_PREF, CYLINDER_REQ)))
+		return (0);
+	if (item != NULL)
+		item->type = 2;
+	return (ret);
+}
+
+size_t	get_cone(t_item *item, char *file)
+{
+	size_t	len;
+	size_t	ret;
+
+	len = ft_strlen("cone");
+	if (ft_strncmp("cone", file, len))
+		return (0);
+	if (!(ret = len + get_item(item, file + len, CONE_PREF, CONE_REQ)))
+		return (0);
+	if (item != NULL)
+	{
+		item->type = 3;
+		item->pref.k = tanf(item->pref.k / 2.f * (CL_M_PI / 180.f));
+	}
+	return (ret);
+}
+
+size_t	get_paraboloid(t_item *item, char *file)
+{
+	size_t	len;
+	size_t	ret;
+
+	len = ft_strlen("paraboloid");
+	if (ft_strncmp("paraboloid", file, len))
+		return (0);
+	if (!(ret = len + get_item(item, file + len, CONE_PREF, CONE_REQ)))
+		return (0);
+	if (item != NULL)
+	{
+		item->type = 4;
+		item->pref.k = tanf(item->pref.k / 2.f * (CL_M_PI / 180.f));
+	}
 	return (ret);
 }
 
@@ -48,7 +101,6 @@ int		get_count(t_rt *rt, char *file)
 {
 	size_t	i;
 	size_t	ret;
-	size_t	len;
 
 	i = 0;
 	i += ft_splits(file + i);
@@ -60,6 +112,12 @@ int		get_count(t_rt *rt, char *file)
 			rt->opt.item_c += 1;
 		else if ((ret = get_sphere(NULL, file + i)))
 			rt->opt.item_c += 1;
+		else if ((ret = get_cylinder(NULL, file + i)))
+			rt->opt.item_c += 1;
+		else if ((ret = get_cone(NULL, file + i)))
+			rt->opt.item_c += 1;
+		else if ((ret = get_paraboloid(NULL, file + i)))
+			rt->opt.item_c += 1;
 		if (ret == 0)
 			return (-1);
 		i += ft_splits(file + i + ret) + ret;
@@ -70,7 +128,6 @@ int		get_count(t_rt *rt, char *file)
 int		extract_item(t_rt *rt, char *file)
 {
 	size_t	ret;
-	size_t	len;
 	size_t	index[3];
 
 	ft_bzero(index, sizeof(size_t) * 3);
@@ -82,6 +139,12 @@ int		extract_item(t_rt *rt, char *file)
 		else if ((ret = get_plane(rt->item + index[2], file + index[0])))
 			index[2] += 1;
 		else if ((ret = get_sphere(rt->item + index[2], file + index[0])))
+			index[2] += 1;
+		else if ((ret = get_cylinder(rt->item + index[2], file + index[0])))
+			index[2] += 1;
+		else if ((ret = get_cone(rt->item + index[2], file + index[0])))
+			index[2] += 1;
+		else if ((ret = get_paraboloid(rt->item + index[2], file + index[0])))
 			index[2] += 1;
 		if (ret == 0)
 			return (-1);

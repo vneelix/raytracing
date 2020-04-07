@@ -34,6 +34,8 @@ float	cylinder(__global struct item *item, float3 center, float3 direct);
 float3	cylinder_normal(__global struct item *item, float3 point, float3 center, float3 direct, float t);
 float	cone(__global struct item *item, float3 center, float3 direct);
 float3	cone_normal(__global struct item *item, float3 point, float3 center, float3 direct, float t);
+float	paraboloid(__global struct item *item, float3 center, float3 direct);
+float3	paraboloid_normal(__global struct item *item, float3 point, float3 center, float3 direct, float t);
 float3	rotation_x(float rad, float3 vec);
 float3	rotation_y(float rad, float3 vec);
 
@@ -59,6 +61,8 @@ float3	get_normal(__global struct item *item, float3 point, float3 center, float
 		normal = cylinder_normal(item, point, center, direct, t);
 	else if (item->type == 3)
 		normal = cone_normal(item, point, center, direct, t);
+	else if (item->type == 4)
+		normal = paraboloid_normal(item, point, center, direct, t);
 	else
 		normal = (float3){1, 0, 0};
 	if (scalar_multiple(normal, direct) > 0)
@@ -146,6 +150,8 @@ uint	traceray(__global struct item *illu, __global struct item *item, struct opt
 			t = cylinder(item + i, center, direct);
 		else if ((item + i)->type == 3)
 			t = cone(item + i, center, direct);
+		else if ((item + i)->type == 4)
+			t = paraboloid(item + i, center, direct);
 		else
 			t = INFINITY;
 		if (t < t_min)

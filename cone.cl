@@ -17,13 +17,13 @@ float	cone_restrict(__global struct item *item, float3 center, float3 direct, fl
 	if (t1 >= 0)
 	{
 		m = scalar_multiple(direct, item->pref.vector) * t1 + scalar_multiple(vec, item->pref.vector);
-		if (m >= -INFINITY && m <= INFINITY)
+		if (m >= item->pref.min && m <= item->pref.max)
 			return (t1);
 	}
 	if (t2 >= 0)
 	{
 		m = scalar_multiple(direct, item->pref.vector) * t2 + scalar_multiple(vec, item->pref.vector);
-		if (m >= -INFINITY && m <= INFINITY)
+		if (m >= item->pref.min && m <= item->pref.max)
 			return (t2);
 	}
 	return (INFINITY);

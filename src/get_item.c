@@ -38,7 +38,7 @@ cl_float3	get_float3(char *string, size_t *ret)
 	*ret = 0;
 	ft_bzero(index, sizeof(size_t) * 2);
 	if (string[index[0]] != '(')
-		return ((cl_float3){INFINITY, INFINITY, INFINITY});
+		return ((cl_float3){{INFINITY, INFINITY, INFINITY}});
 	index[0] += ft_splits(string + 1) + 1;
 	while (index[1] < 3 && string[index[0]] != '\0')
 	{
@@ -46,15 +46,15 @@ cl_float3	get_float3(char *string, size_t *ret)
 		index[0] += ft_splits(string + index[0] + (*ret)) + (*ret);
 		*ret = 0;
 		if (string[index[0]] != ',' && index[1] != 2)
-			return((cl_float3){INFINITY, INFINITY, INFINITY});
+			return((cl_float3){{INFINITY, INFINITY, INFINITY}});
 		index[0] += (string[index[0]] == ',' ? 1 : 0);
 		index[0] += ft_splits(string + index[0]);
 		index[1] += 1;
 	}
 	if (string[index[0]] != ')')
-		return((cl_float3){INFINITY, INFINITY, INFINITY});
+		return((cl_float3){{INFINITY, INFINITY, INFINITY}});
 	*ret = index[0] + 1;
-	return((cl_float3){val[0], val[1], val[2]});
+	return((cl_float3){{val[0], val[1], val[2]}});
 }
 
 size_t		extract_float3(char *keyword, char *string, void *arg)

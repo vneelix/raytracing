@@ -6,7 +6,7 @@ int		sdl_init(t_sdl *sdl)
 		return (-1);
 	if ((sdl->win = SDL_CreateWindow("RTv1",
 		SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-			W, H, SDL_WINDOW_SHOWN | SDL_WINDOW_INPUT_GRABBED)) == NULL)
+			W, H, SDL_WINDOW_SHOWN)) == NULL)
 	{
 		SDL_Quit();
 		return (-1);
@@ -73,8 +73,8 @@ int		sdl_loop(t_sdl *sdl, t_rt *rt)
 			}
 			else if (sdl->event.type == SDL_KEYDOWN)
 				ret = sdl_keyhook(sdl->event.key.keysym.sym, rt);
-			/*else if (sdl->event.type == SDL_MOUSEMOTION)
-				ret = sdl_mousehook(sdl, rt);*/
+			else if (sdl->event.type == SDL_MOUSEMOTION)
+				ret = sdl_mousehook(sdl, rt);
 			if (ret)
 			{
 				ret = opencl_launch(&(rt->cl), rt);

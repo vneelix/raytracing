@@ -1,18 +1,14 @@
 illum{
 	k 0.6
-	center (0, -10, 30)
+	center (0, 0, 0)
 }
 
-plane{
+paraboloid{
 	shine 5000
 	rgb (0, 0, 255)
-	center (0, 10, 30)
+	center (0, 0, 30)
 	vector (0, -1, 0)
-}
-
-sphere{
-	shine 5000
-	rgb (90, 10, 75)
-	center (0, -5, 50)
-	radius 10
+	max 40
+	min 20
+	k 120
 }

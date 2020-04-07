@@ -113,10 +113,14 @@ size_t		get_item(t_item *item, char *file, __uint32_t pref, __uint32_t req);
 #define	REFLECT	256
 #define	REFRACT	512
 
-#define	ILLUM_REQ	(CENTER | K)
+#define	ATTR	(RGB | SHINE | REFLECT |REFRACT)
+#define	REST	(MIN | MAX | K)
 #define	PLANE_REQ	(CENTER | VECTOR | RGB)
+#define	PLANE_PREF	(CENTER | VECTOR | ATTR)
 #define	SPHERE_REQ	(CENTER | RADIUS | RGB)
-#define	ILLUM_PREF	(CENTER | RGB | K)
-#define	PLANE_PREF	(CENTER | VECTOR | RGB | SHINE | REFRACT | REFLECT)
-#define	SPHERE_PREF	(CENTER | RADIUS | RGB | SHINE | REFRACT | REFLECT)
+#define	SPHERE_PREF	(CENTER | RADIUS | ATTR)
+#define CONE_REQ (CENTER | VECTOR | K | RGB)
+#define	CONE_PREF (CENTER | VECTOR | ATTR | REST)
+#define	CYLINDER_REQ (CENTER | RADIUS | VECTOR | RGB)
+#define	CYLINDER_PREF (CENTER | RADIUS | VECTOR | ATTR | (REST - K))
 #endif

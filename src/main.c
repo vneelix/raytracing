@@ -47,8 +47,9 @@ void*		opencl_scan(char **files, cl_uint count)
 int				main(void)
 {
 	t_rt	*rt;
-	cl_uint	count = 6;
-	char	*files[] = {"main_func.cl", "plane.cl", "sphere.cl", "cylinder.cl", "cone.cl", "func.cl"};
+	cl_uint	count = 7;
+	char	*files[] = {"main_func.cl", "plane.cl",
+		"sphere.cl", "cylinder.cl", "cone.cl", "func.cl", "paraboloid.cl"};
 	char	**sources;
 
 	rt = malloc(sizeof(t_rt));
@@ -64,7 +65,7 @@ int				main(void)
 	SDL_SetRelativeMouseMode(SDL_ENABLE);
 	rt->opt.w = rt->sdl.surf->w;
 	rt->opt.h = rt->sdl.surf->h;
-	rt->opt.center = (cl_float3){0, 0, 0};
+	rt->opt.center = (cl_float3){{0, 0, 0}};
 	sources = opencl_scan(files, count);
 	if (opencl_init(&(rt->cl), sources, count, rt))
 		return (-1);
