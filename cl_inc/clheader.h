@@ -4,6 +4,7 @@ struct __attribute__ ((packed)) pref{
 	float3	center;
 	float3	vector;
 	float	radius;
+	float	sm_rad;
 	float	min;
 	float	max;
 	float	k;

@@ -6,7 +6,7 @@
 /*   By: vneelix <vneelix@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/03 12:47:38 by vneelix           #+#    #+#             */
-/*   Updated: 2020/04/29 05:24:02 by vneelix          ###   ########.fr       */
+/*   Updated: 2020/04/29 17:06:14 by vneelix          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,7 @@ typedef struct __attribute__ ((packed)) s_pref{
 	cl_float3	center;
 	cl_float3	vector;
 	cl_float	radius;
+	cl_float	sm_rad;
 	cl_float	min;
 	cl_float	max;
 	cl_float	k;
