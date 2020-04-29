@@ -187,7 +187,7 @@ int		get_scene(t_rt *rt, char *file_name)
 
 	if ((ret = open(file_name, O_RDONLY)) < 0)
 		return (-1);
-	file = ft_getfile(ret);
+	file = ft_getfile(NULL, ret);
 	close(ret);
 	if (file == NULL || file[0] == '\0')
 	{

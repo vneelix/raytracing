@@ -1,3 +1,5 @@
+#include "clheader.h"
+
 float3	paraboloid_normal(__global struct item *item, float3 point, float3 center, float3 direct, float t)
 {
 	float		m;

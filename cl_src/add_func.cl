@@ -1,6 +1,13 @@
+#include "clheader.h"
+
 float	scalar_multiple(float3 a, float3 b)
 {
-	return (a.x * b.x + a.y * b.y + a.z * b.z);
+	float ret;
+
+	ret = a.x * b.x + a.y * b.y + a.z * b.z;
+	if (ret > -0.001 && ret < 0.001)
+		return (0);
+	return (ret);
 }
 
 float	get_rate(float a, float b)
@@ -12,19 +19,15 @@ float	get_rate(float a, float b)
 	return (b);
 }
 
-float	calc_ratio(float3 a, float3 b)
-{
-	return (scalar_multiple(normalize(a), normalize(b)));
-}
-
 float	angle(float3 a, float3 b)
 {
-	return (acos(scalar_multiple(normalize(a), normalize(b))));
+	return (acos(scalar_multiple(a, b)));
 }
 
 float3	get_reflect_vec(float3 vec, float3 normal)
 {
 	float3	ret;
+	float	num;
 
 	normal *= scalar_multiple(-vec, normal);
 	return (normalize(2*normal + vec));
@@ -60,4 +63,34 @@ float3 rotation_y(float rad, float3 vec)
   ret.y = vec.y;
   ret.z = vec.x * -(sin(rad)) + vec.z * cos(rad);
   return (ret);
+}
+
+float	minimal_param(__global struct item *item,
+	int count, float3 center, float3 direct, int *item_index)
+{
+	float t, min;
+
+	min = INFINITY;
+	while (--count != -1)
+	{
+		if ((item + count)->type == 0)
+			t = plane(item + count, center, direct);
+		else if ((item + count)->type == 1)
+			t = sphere(item + count, center, direct);
+		else if ((item + count)->type == 2)
+			t = cylinder(item + count, center, direct);
+		else if ((item + count)->type == 3)
+			t = cone(item + count, center, direct);
+		else if ((item + count)->type == 4)
+			t = paraboloid(item + count, center, direct);
+		else
+			t = INFINITY;
+		if (t < min)
+		{
+			min = t;
+			if (item_index != NULL)
+				*item_index = count;
+		}
+	}
+	return (min);
 }

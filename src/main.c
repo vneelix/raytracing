@@ -6,55 +6,51 @@
 /*   By: vneelix <vneelix@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/24 20:17:14 by vneelix           #+#    #+#             */
-/*   Updated: 2020/02/27 17:48:19 by vneelix          ###   ########.fr       */
+/*   Updated: 2020/04/29 05:39:38 by vneelix          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "rtv1.h"
 
-void*		opencl_scan(char **files, cl_uint count)
+char	**cl_source(void)
 {
-	cl_uint		i;
-	cl_int		ret;
-	char**		sources;
+	size_t	i;
+	char	*ptr;
+	char	**ret;
+	char	**file;
+	size_t	num_files;
 
-	if ((sources = (char**)malloc(sizeof(char*) * count)) == NULL)
+	if ((file = ft_directory("cl_src", &num_files)) == NULL)
 		return (NULL);
+	if ((ret = (char**)ft_memalloc(sizeof(char*) * (num_files + 1))) == NULL)
+		return (nptr_del((void**)file));
 	i = 0;
-	while (i < count)
+	while (i != num_files)
 	{
-		if ((ret = open(files[i], O_RDONLY)) < 0)
+		if ((ptr = ft_strjoin("cl_src/", file[i])) == NULL)
 			break ;
-		if ((sources[i] = ft_getfile(ret)) == NULL)
-		{
-			close(ret);
+		if ((ret[i++] = ft_getfile(ptr, 0)) == NULL)
 			break ;
-		}
-		close(ret);
-		i += 1;
+		ft_memdel(ptr);
 	}
-	if (i != count)
-	{
-		i -= (i != 0 ? 1 : 0);
-		while (i > 0)
-			free(sources[i--]);
-		free(sources[i]);
-		free(sources);
-	}
-	return (sources);
+	ptr = (i == num_files ? NULL : ptr);
+	ft_memdel(ptr);
+	nptr_del((void**)file);
+	if (i != num_files)
+		return (nptr_del((void**)ret));
+	return (ret);
 }
 
-int				main(void)
+int	main(int argc, char **argv)
 {
 	t_rt	*rt;
-	cl_uint	count = 7;
-	char	*files[] = {"main_func.cl", "plane.cl",
-		"sphere.cl", "cylinder.cl", "cone.cl", "add_func.cl", "paraboloid.cl"};
-	char	**sources;
+	char	**source;
 
+	if (argc != 2)
+		return (-1);
 	rt = malloc(sizeof(t_rt));
 	ft_bzero(rt, sizeof(t_rt));
-	if (get_scene(rt, "file"))
+	if (get_scene(rt, argv[1]))
 	{
 		printf("Scene file error\n");
 		return (-1);
@@ -65,9 +61,13 @@ int				main(void)
 	rt->opt.w = rt->sdl.surf->w;
 	rt->opt.h = rt->sdl.surf->h;
 	rt->opt.center = (cl_float3){{0, 0, 0}};
-	sources = opencl_scan(files, count);
-	if (opencl_init(&(rt->cl), sources, count, rt))
+	if ((source = cl_source()) == NULL)
 		return (-1);
+	if (opencl_init(&(rt->cl), source, rt))
+	{
+		perror(NULL);
+		return (-1);
+	}
 	SDL_UpdateWindowSurface(rt->sdl.win);
 	sdl_loop(&(rt->sdl), rt);
 	return (0);

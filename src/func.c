@@ -25,3 +25,17 @@ size_t	ft_number(char *s)
 	}
 	return (i);
 }
+
+void	*nptr_del(void **nptr)
+{
+	void	*ptr;
+
+	ptr = nptr;
+	while (nptr != NULL && *nptr != NULL)
+	{
+		ft_memdel(*nptr);
+		nptr += 1;
+	}
+	ft_memdel(ptr);
+	return (NULL);
+}

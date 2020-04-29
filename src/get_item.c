@@ -85,7 +85,7 @@ size_t		get_item(t_item *item, char *file, __uint32_t pref, __uint32_t req)
 	size_t		index;
 
 	flags = 0;
-	index = 0;
+	index = ft_splits(file);
 	if (file[index] != '{')
 		return (0);
 	index += (ft_splits(file + index + 1) + 1);

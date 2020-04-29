@@ -1,0 +1,13 @@
+illum {
+	k 0.6
+	center (0, 0, 0)
+}
+paraboloid{
+    k 60
+    center (0, 5, 10)
+    rgb (0, 0, 255)
+    vector (0, -1, 0)
+    min 4
+    max 10
+    shine 5000
+}

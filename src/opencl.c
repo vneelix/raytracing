@@ -26,9 +26,6 @@ cl_int		opencl_launch(t_opencl *cl, t_rt *rt)
 	size_t	work_size;
 
 	work_size = rt->opt.w * rt->opt.h;
-	ret = clSetKernelArg(cl->kernel, 0, sizeof(cl_mem), cl->memobj);
-	ret = clSetKernelArg(cl->kernel, 1, sizeof(cl_mem), cl->memobj + 1);
-	ret = clSetKernelArg(cl->kernel, 2, sizeof(cl_mem), cl->memobj + 2);
 	ret = clSetKernelArg(cl->kernel, 3, sizeof(t_opt), &(rt->opt));
 	ret = clEnqueueNDRangeKernel(cl->command_queue,
 		cl->kernel, 1, NULL, &(work_size), NULL, 0, NULL, NULL);
@@ -37,14 +34,18 @@ cl_int		opencl_launch(t_opencl *cl, t_rt *rt)
 	return (0);
 }
 
-cl_int		opencl_program(t_opencl *cl, char **sources, cl_uint count)
+cl_int		opencl_program(t_opencl *cl, char **sources)
 {
 	cl_int	ret;
+	cl_uint	count;
 
+	count = 0;
+	while (sources[count] != NULL)
+		count += 1;
 	cl->program = clCreateProgramWithSource(cl->context, count, (const char**)(sources), NULL, &ret);
 	if (ret)
 		return (ret);
-	if ((ret = clBuildProgram(cl->program, 1, &(cl->device_id), "-I./", NULL, NULL)))
+	if ((ret = clBuildProgram(cl->program, 1, &(cl->device_id), "-Icl_inc", NULL, NULL)))
 	{
 		size_t log_size;
 		clGetProgramBuildInfo(cl->program, cl->device_id, CL_PROGRAM_BUILD_LOG, 0, NULL, &log_size);
@@ -58,7 +59,7 @@ cl_int		opencl_program(t_opencl *cl, char **sources, cl_uint count)
 	return (0);
 }
 
-cl_int		opencl_init(t_opencl *cl, char **sources, cl_uint count, t_rt *rt)
+cl_int		opencl_init(t_opencl *cl, char **sources, t_rt *rt)
 {
 	cl_int	ret;
 	cl_uint	num;
@@ -73,10 +74,13 @@ cl_int		opencl_init(t_opencl *cl, char **sources, cl_uint count, t_rt *rt)
 	cl->command_queue = clCreateCommandQueueWithProperties(cl->context, cl->device_id, NULL, &ret);
 	if (ret)
 		return (ret);
-	if ((ret = opencl_program(cl, sources, count)))
+	if ((ret = opencl_program(cl, sources)))
 		return (ret);
 	if ((ret = opencl_memobj(cl ,rt)))
 		return (ret);
+	ret = clSetKernelArg(cl->kernel, 0, sizeof(cl_mem), cl->memobj);
+	ret = clSetKernelArg(cl->kernel, 1, sizeof(cl_mem), cl->memobj + 1);
+	ret = clSetKernelArg(cl->kernel, 2, sizeof(cl_mem), cl->memobj + 2);
 	if ((ret = opencl_launch(cl, rt)))
 		return (ret);
 	return (0);

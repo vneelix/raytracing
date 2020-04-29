@@ -1,3 +1,5 @@
+#include "clheader.h"
+
 float	sphere(__global struct item *item, float3 center, float3 direct)
 {
 	float3		vec;

@@ -6,7 +6,7 @@
 /*   By: vneelix <vneelix@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/03 12:47:38 by vneelix           #+#    #+#             */
-/*   Updated: 2020/02/27 17:54:16 by vneelix          ###   ########.fr       */
+/*   Updated: 2020/04/29 05:24:02 by vneelix          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,6 @@
 # define RTV1_H
 
 # include <math.h>
-# include <pthread.h>
 # include <SDL2/SDL.h>
 # include <SDL2/SDL_keyboard.h>
 #ifdef __APPLE__
@@ -32,6 +31,7 @@ typedef struct	s_opencl{
 	cl_program			program;
 	cl_mem				memobj[3];
 	cl_kernel			kernel;
+	cl_event			event;
 }				t_opencl;
 
 typedef struct	s_sdl{
@@ -82,12 +82,14 @@ typedef struct	s_rt
 }				t_rt;
 
 #include <stdio.h>
+#include <errno.h>
 
 cl_int		opencl_launch(t_opencl *cl, t_rt *rt);
-cl_int		opencl_init(t_opencl *cl, char **sources, cl_uint count, t_rt *rt);
+cl_int		opencl_init(t_opencl *cl, char **sources, t_rt *rt);
 
 size_t		ft_splits(char *s);
 size_t		ft_number(char *s);
+void		*nptr_del(void **nptr);
 int			sdl_init(t_sdl *sdl);
 int			sdl_loop(t_sdl *sdl, t_rt *rt);
 int			get_scene(t_rt *rt, char *file_name);
@@ -99,8 +101,8 @@ size_t		extract_param(char *string, t_item *item, __uint32_t *flags);
 size_t		get_item(t_item *item, char *file, __uint32_t pref, __uint32_t req);
 
 # define DIFFUSE 0.06
-# define W 1024
-# define H 1024
+# define W 800
+# define H 800
 
 #define	CENTER	1
 #define	VECTOR	2
