@@ -33,13 +33,13 @@ float3	get_reflect_vec(float3 vec, float3 normal)
 	return (normalize(2*normal + vec));
 }
 
-float3	get_refract_vec(float3 vec, float3 normal, float n1, float n2)
+float3	get_refract_vec(float3 vec, float3 normal, float n)
 {
 	float	a, b;
 	float3	ret;
 
 	a = angle(-vec, normal);
-	b = asin((n1 / n2) * sin(a));
+	b = asin((1.f / n) * sin(a));
 	ret = normalize(vec + normal * scalar_multiple(-vec, normal)) * tan(b);
 	ret = normalize(-normal + ret);
 	return (ret);
@@ -71,25 +71,25 @@ float	minimal_param(__global struct item *item,
 	float t, min;
 
 	min = INFINITY;
-	while (--count != -1)
+	for (int i = 0; i != count; i += 1)
 	{
-		if ((item + count)->type == 0)
-			t = plane(item + count, center, direct);
-		else if ((item + count)->type == 1)
-			t = sphere(item + count, center, direct);
-		else if ((item + count)->type == 2)
-			t = cylinder(item + count, center, direct);
-		else if ((item + count)->type == 3)
-			t = cone(item + count, center, direct);
-		else if ((item + count)->type == 4)
-			t = paraboloid(item + count, center, direct);
+		if ((item + i)->type == 0)
+			t = plane(item + i, center, direct);
+		else if ((item + i)->type == 1)
+			t = sphere(item + i, center, direct);
+		else if ((item + i)->type == 2)
+			t = cylinder(item + i, center, direct);
+		else if ((item + i)->type == 3)
+			t = cone(item + i, center, direct);
+		else if ((item + i)->type == 4)
+			t = paraboloid(item + i, center, direct);
 		else
 			t = INFINITY;
 		if (t < min)
 		{
 			min = t;
 			if (item_index != NULL)
-				*item_index = count;
+				*item_index = i;
 		}
 	}
 	return (min);

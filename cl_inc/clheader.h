@@ -4,7 +4,6 @@ struct __attribute__ ((packed)) pref{
 	float3	center;
 	float3	vector;
 	float	radius;
-	float	sm_rad;
 	float	min;
 	float	max;
 	float	k;
@@ -51,7 +50,7 @@ float	get_rate(float a, float b);
 float	calc_ratio(float3 a, float3 b);
 float	angle(float3 a, float3 b);
 float3	get_reflect_vec(float3 vec, float3 normal);
-float3	get_refract_vec(float3 vec, float3 normal, float n1, float n2);
+float3	get_refract_vec(float3 vec, float3 normal, float n);
 float3	rotation_x(float rad, float3 vec);
 float3	rotation_y(float rad, float3 vec);
 float	minimal_param(__global struct item *item,

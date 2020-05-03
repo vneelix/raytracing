@@ -6,7 +6,7 @@
 /*   By: vneelix <vneelix@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/03 12:47:38 by vneelix           #+#    #+#             */
-/*   Updated: 2020/04/29 17:06:14 by vneelix          ###   ########.fr       */
+/*   Updated: 2020/05/03 20:33:53 by vneelix          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,6 @@ typedef struct __attribute__ ((packed)) s_pref{
 	cl_float3	center;
 	cl_float3	vector;
 	cl_float	radius;
-	cl_float	sm_rad;
 	cl_float	min;
 	cl_float	max;
 	cl_float	k;
@@ -102,8 +101,8 @@ size_t		extract_param(char *string, t_item *item, __uint32_t *flags);
 size_t		get_item(t_item *item, char *file, __uint32_t pref, __uint32_t req);
 
 # define DIFFUSE 0.06
-# define W 800
-# define H 800
+# define W 1000
+# define H 1000
 
 #define	CENTER	1
 #define	VECTOR	2

@@ -1,0 +1,13 @@
+illum{
+	center (0, 0, 0)
+	k 0.6
+}
+
+sphere{
+	center (0, 0, 30)
+	radius 10
+	rgb (0, 0, 255)
+	shine 5000
+	reflect 0.6
+	refract 0.0
+}

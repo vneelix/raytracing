@@ -6,7 +6,7 @@
 #    By: vneelix <vneelix@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/02/26 14:32:38 by vneelix           #+#    #+#              #
-#    Updated: 2020/02/27 17:23:46 by vneelix          ###   ########.fr        #
+#    Updated: 2020/05/02 03:38:32 by vneelix          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -28,7 +28,7 @@ CRFLAGS = -Wall -Wextra -Werror -O2 -I./inc -c
 
 CDFLAGS = -g -O0 -I./inc -c
 
-LFLAGS = -lm -lSDL2 -lOpenCL -lpthread -L./lib -lft -o $(NAME)
+LFLAGS = -lm -lSDL2 -lOpenCL -L./lib -lft -o $(NAME)
 
 MODE = RELEASE
 
