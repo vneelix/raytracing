@@ -1,5 +1,10 @@
 #ifndef CLHEADER_H
 #define CLHEADER_H
+
+#define DPH 1
+#define CLR (1 << DPH + 1) - 2
+#define STE (1 << DPH) / 2
+
 struct __attribute__ ((packed)) pref{
 	float3	center;
 	float3	vector;
@@ -19,7 +24,6 @@ struct __attribute__ ((packed)) item{
 	struct attr	attr;
 	int			type;
 };
-
 struct __attribute__ ((packed)) opt{
 	int		w;
 	int		h;

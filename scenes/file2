@@ -1,13 +1,34 @@
-illum {
+illum{
 	k 0.6
 	center (0, 0, 0)
 }
-paraboloid{
-    k 60
-    center (0, 5, 10)
+sphere{
+    center (-13, 0, 50)
     rgb (0, 0, 255)
-    vector (0, -1, 0)
-    min 4
-    max 10
+    radius 10
     shine 5000
+    reflect 0.0
+    refract 0.0
+}
+cone{
+    center (4, -15, 60)
+    rgb (0, 255, 0)
+    k 45
+    shine 5000
+    reflect 0.0
+    refract 0.0
+    min 0
+    max 25
+    vector (0, 1, 0)
+}
+cylinder{
+    center (17, 0, 50)
+    rgb (255, 0, 0)
+    radius 5
+    shine 5000
+    reflect 0.0
+    refract 0.0
+    vector (0, 1, 0)
+    min -20
+    max 20
 }

@@ -2,12 +2,7 @@
 
 float	scalar_multiple(float3 a, float3 b)
 {
-	float ret;
-
-	ret = a.x * b.x + a.y * b.y + a.z * b.z;
-	if (ret > -0.001 && ret < 0.001)
-		return (0);
-	return (ret);
+	return (a.x * b.x + a.y * b.y + a.z * b.z);
 }
 
 float	get_rate(float a, float b)
@@ -35,8 +30,8 @@ float3	get_reflect_vec(float3 vec, float3 normal)
 
 float3	get_refract_vec(float3 vec, float3 normal, float n)
 {
-	float	a, b;
 	float3	ret;
+	float	a, b;
 
 	a = angle(-vec, normal);
 	b = asin((1.f / n) * sin(a));

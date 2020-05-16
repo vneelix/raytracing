@@ -2,9 +2,9 @@
 
 struct state
 {
-	__global struct item	*item;
 	float3					point;
 	float3					normal;
+	float3					direct;
 };
 
 float3	get_normal(__global struct item *item, float3 point, float3 center, float3 direct, float t)
@@ -41,25 +41,29 @@ uint	rgb_to_uint(float3 rgb)
 	return (color);
 }
 
-float3	calc_light(__global struct item *illu, __global struct item *item,
-		int item_index, struct opt opt, float3 center, float3 direct, float t, struct state *state)
+float3	calc_light(__global struct item *illu, __global struct item *item, int item_index,
+			struct opt opt, float3 center, float3 direct, float t, struct state *state, __global struct item **ptr)
 {
 	float3		point, normal, illu_vec;
 	float		diffuse = 0.06, shine = 0, ratio = 0;
 
 	point = center + direct * t;
 	normal = get_normal(item + item_index, point, center, direct, t);
-	state->point = point;
-	state->normal = normal;
-	state->item = item + item_index;
+	if (state != NULL && ptr != NULL)
+	{
+		state->point = point;
+		state->normal = normal;
+		state->direct = direct;
+		*ptr = item + item_index;
+	}
 	point += normal * 0.001f;
 	for (int i = 0; i != opt.illu_c; i += 1)
 	{
 		illu_vec = (illu + i)->pref.center - point;
 		t = minimal_param(item, opt.item_c, point, illu_vec, NULL);
-		if (t >= 0.f && t <= 1.f)
+		if (t > 0.f && t <= 1.f)
 			continue ;
-		if ((ratio = scalar_multiple(normalize(illu_vec), normalize(normal))) > 0.001)
+		if ((ratio = scalar_multiple(normalize(illu_vec), normalize(normal))) > 0.001f)
 		{
 			diffuse += (ratio * (illu + i)->pref.k);
 			if ((item + item_index)->attr.shine != 0.f)
@@ -71,15 +75,16 @@ float3	calc_light(__global struct item *illu, __global struct item *item,
 }
 
 float3	traceray(__global struct item *illu, __global struct item *item,
-		struct opt opt, float3 center, float3 direct, struct state *state)
+		struct opt opt, float3 center, float3 direct, struct state *state, __global struct item **ptr)
 {
 	float	t;
 	int		item_index;
 
 	t = minimal_param(item, opt.item_c, center, direct, &item_index);
 	if (t != INFINITY)
-		return (calc_light(illu, item, item_index, opt, center, direct, t, state));
-	state->item = NULL;
+		return (calc_light(illu, item, item_index, opt, center, direct, t, state, ptr));
+	if (ptr != NULL)
+		*ptr = NULL;
 	return ((float3){0, 0, 0});
 }
 
@@ -105,6 +110,51 @@ float3	get_direct(float3 *point, struct opt *opt)
 	return (direct);
 }
 
+void	create_set(__global struct item *illu, __global struct item *item,
+			struct opt opt, float3 *color, struct state *ptr, __global struct item **obj)
+{
+	int f = 0;
+	int	num = 2;
+	int	obj_id = -1;
+	int	color_id = 0;
+	struct state state[STE * 2];
+
+	state[0] = *ptr;
+	for (int i = 0; i != DPH; i += 1)
+	{
+		for (int j = 0, k = 0; j != num; j += 2, k += 1)
+		{
+			if (obj[obj_id] != NULL && obj[obj_id]->attr.reflect != 0.f)
+				color[color_id] = traceray(illu, item, opt, state[f + k].point + state[f + k].normal * 0.001f, get_reflect_vec(
+					state[f + k].direct, state[f + k].normal), (i != (DPH - 1) ? state + (f == 0 ? STE : 0) + j : NULL), obj + color_id);
+			if (obj[obj_id] != NULL && obj[obj_id]->attr.refract != 0.f)
+				color[color_id + 1] = traceray(illu, item, opt, state[f + k].point - state[f + k].normal * 0.001f, get_refract_vec(state[f + k].direct, state[f 
+					+ k].normal, obj[obj_id]->attr.refract), (i != (DPH - 1) ? state + (f == 0 ? STE : 0) + j + 1 : NULL), obj + color_id + 1);
+			color_id += 2;
+			obj_id += 1;
+		}
+		f = (f == 0 ? STE : 0);
+		num <<= 1;
+	}
+}
+
+void	collapse_set(float3 *color, __global struct item **obj)
+{
+	if (DPH != 1)
+	{
+		int active, next;
+		for (int i = (DPH - 1); i != 0; i -= 1)
+		{
+			for (active = (1 << i) - 2, next = (1 << (i + 1)) - 2; active != next; active += 2)
+			{
+				if (obj[active] != NULL)
+					color[active] = color[active] * (1.f - obj[active]->attr.reflect) + color[next] * obj[active]->attr.reflect;
+			}
+		}
+	}
+	color[-1] = color[-1] * (1.f - obj[-1]->attr.reflect) + color[0] * obj[-1]->attr.reflect;
+}
+
 __kernel void	main_func(__global uint *pixel,
 	__global struct item *illu, __global struct item *item, struct opt opt)
 {
@@ -112,30 +162,15 @@ __kernel void	main_func(__global uint *pixel,
 	float3	point = get_point(id, &opt);
 	float3	direct = get_direct(&point, &opt);
 
-	//pixel[id] = rgb_to_uint(traceray(illu, item, opt, opt.center, direct));
-	struct state	state;
-	float3			color_set[128];
-	float2			ratio_set[128];
+	struct state state;
+	float3 color[CLR + 1] = {0};
+	__global struct item *obj[CLR + 1] = {NULL};
 
-	state.point = opt.center;
-
-	int i;
-
-	for (i = 0; i != 12; i += 1)
+	color[0] = traceray(illu, item, opt, opt.center, direct, &state, obj);
+	if (obj[0] != NULL)
 	{
-		color_set[i] = traceray(illu, item, opt, state.point, direct, &state);
-		if (state.item == NULL)
-			break ;
-		(ratio_set[i]).x = state.item->attr.reflect;
-		if (state.item->attr.reflect == 0.f)
-			break ;
-		direct = get_reflect_vec(direct, state.normal);
-		state.point += (state.normal * 0.001f);
+		create_set(illu, item, opt, color + 1, &state, obj + 1);
+		collapse_set(color + 1, obj + 1);
 	}
-	i -= (state.item == NULL || (state.item != NULL && state.item->attr.reflect == 0.f) ? 0 : 1);
-	if (state.item != NULL)
-		color_set[i] *= (1.f - (ratio_set[i]).x);
-	for (; i != 0; i -= 1)
-		color_set[i - 1] = color_set[i - 1] * (1.f - (ratio_set[i - 1]).x) + color_set[i] * (ratio_set[i - 1]).x;
-	pixel[id] = rgb_to_uint(color_set[0]);
+	pixel[id] = rgb_to_uint(color[0]);
 }

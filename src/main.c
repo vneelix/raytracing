@@ -6,7 +6,7 @@
 /*   By: vneelix <vneelix@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/24 20:17:14 by vneelix           #+#    #+#             */
-/*   Updated: 2020/05/03 20:57:40 by vneelix          ###   ########.fr       */
+/*   Updated: 2020/05/15 13:43:40 by vneelix          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ char	**cl_source(void)
 	return (ret);
 }
 
-int	main(int argc, char **argv)
+int		main(int argc, char **argv)
 {
 	t_rt	*rt;
 	char	**source;

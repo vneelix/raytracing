@@ -6,13 +6,15 @@
 /*   By: vneelix <vneelix@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/03 12:47:38 by vneelix           #+#    #+#             */
-/*   Updated: 2020/05/03 20:33:53 by vneelix          ###   ########.fr       */
+/*   Updated: 2020/05/15 14:08:44 by vneelix          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef RTV1_H
 # define RTV1_H
 
+# include <stdio.h>
+# include <errno.h>
 # include <math.h>
 # include <SDL2/SDL.h>
 # include <SDL2/SDL_keyboard.h>
@@ -81,9 +83,6 @@ typedef struct	s_rt
 	t_item		*item;
 }				t_rt;
 
-#include <stdio.h>
-#include <errno.h>
-
 cl_int		opencl_launch(t_opencl *cl, t_rt *rt);
 cl_int		opencl_init(t_opencl *cl, char **sources, t_rt *rt);
 
@@ -120,7 +119,7 @@ size_t		get_item(t_item *item, char *file, __uint32_t pref, __uint32_t req);
 #define	PLANE_REQ	(CENTER | VECTOR | RGB)
 #define	PLANE_PREF	(CENTER | VECTOR | ATTR)
 #define	SPHERE_REQ	(CENTER | RADIUS | RGB)
-#define	SPHERE_PREF	(CENTER | RADIUS | ATTR)
+#define	SPHERE_PREF	(CENTER | RADIUS | ATTR | VECTOR)
 #define CONE_REQ (CENTER | VECTOR | K | RGB)
 #define	CONE_PREF (CENTER | VECTOR | ATTR | REST)
 #define	CYLINDER_REQ (CENTER | RADIUS | VECTOR | RGB)
