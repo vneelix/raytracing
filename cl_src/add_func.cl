@@ -1,5 +1,21 @@
 #include "clheader.h"
 
+void	swap(float *a, float *b)
+{
+	float buff;
+
+	buff = *a;
+	*a = *b;
+	*b = buff;
+}
+
+float	outside(float3 direct, float3 normal)
+{
+	if (scalar_multiple(direct, normal) > 0.001)
+		return (-1);
+	return (1);
+}
+
 float	scalar_multiple(float3 a, float3 b)
 {
 	return (a.x * b.x + a.y * b.y + a.z * b.z);
@@ -16,28 +32,55 @@ float	get_rate(float a, float b)
 
 float	angle(float3 a, float3 b)
 {
-	return (acos(scalar_multiple(a, b)));
+	return (acos(scalar_multiple(normalize(a), normalize(b))));
 }
 
-float3	get_reflect_vec(float3 vec, float3 normal)
+float3	get_reflect_vec(float3 direct, float3 normal)
 {
-	float3	ret;
-	float	num;
-
-	normal *= scalar_multiple(-vec, normal);
-	return (normalize(2*normal + vec));
+	if (scalar_multiple(direct, normal) > 0.001)
+		normal = -normal;
+	return (normalize(2 * normal * scalar_multiple(-direct, normal) + direct));
 }
 
-float3	get_refract_vec(float3 vec, float3 normal, float n)
+float3	get_refract_vec(float3 direct, float3 normal, float etat)
 {
-	float3	ret;
-	float	a, b;
+	float cosi, eta, etai, k;
 
-	a = angle(-vec, normal);
-	b = asin((1.f / n) * sin(a));
-	ret = normalize(vec + normal * scalar_multiple(-vec, normal)) * tan(b);
-	ret = normalize(-normal + ret);
-	return (ret);
+	etai = 1;
+	cosi = scalar_multiple(normalize(direct), normalize(normal));
+	if (cosi < 0.001)
+		cosi = -cosi;
+	else
+	{
+		normal = -normal;
+		swap(&etai, &etat);
+	}
+	eta = etai/ etat;
+	k = 1 - eta * eta * (1 - cosi * cosi); 
+    return (k < 0 ? 0 : eta * direct + (eta * cosi - sqrt(k)) * normal);
+}
+
+float	fresnel(float3 direct, float3 normal, float etat)
+{
+	float sint, cosi, etai;
+
+	etai = 1;
+	cosi = scalar_multiple(normalize(direct), normalize(normal));
+	if (cosi > 0.001)
+		swap(&etai, &etat);
+	sint = etai / etat * sqrt(max(0.f, 1.f - cosi * cosi));
+	if (sint >= 1.f)
+		return (1);
+	else
+	{
+		float cost, Rs, Rp;
+
+		cost = sqrt(max(0.f, 1.f - sint * sint));
+		cosi = fabs(cosi);
+		Rs = ((etat * cosi) - (etai * cost)) / ((etat * cosi) + (etai * cost));
+		Rp = ((etai * cosi) - (etat * cost)) / ((etai * cosi) + (etat * cost));
+		return ((Rs * Rs + Rp * Rp) / 2.f);
+	}
 }
 
 float3 rotation_x(float rad, float3 vec)

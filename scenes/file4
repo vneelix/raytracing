@@ -7,10 +7,14 @@ plane{
 	center (0, 8, 0)
 	rgb (153, 204, 255)
 	shine 0
+	reflect 0.0
+	refract 0.0
 }
 sphere{
 	center (0, -2, 20)
 	radius 5
-	rgb (255, 255, 153)
+	rgb (255, 255, 213)
 	shine 0
+	reflect 0.0
+	refract 1.4
 }

@@ -2,9 +2,9 @@
 
 struct state
 {
-	float3					point;
-	float3					normal;
-	float3					direct;
+	float3	point;
+	float3	normal;
+	float3	direct;
 };
 
 float3	get_normal(__global struct item *item, float3 point, float3 center, float3 direct, float t)
@@ -23,8 +23,6 @@ float3	get_normal(__global struct item *item, float3 point, float3 center, float
 		normal = paraboloid_normal(item, point, center, direct, t);
 	else
 		normal = (float3){0, 0, 0};
-	if (scalar_multiple(direct, normal) > 0)
-		normal *= -1.f;
 	return (normal);
 }
 
@@ -41,8 +39,8 @@ uint	rgb_to_uint(float3 rgb)
 	return (color);
 }
 
-float3	calc_light(__global struct item *illu, __global struct item *item, int item_index,
-			struct opt opt, float3 center, float3 direct, float t, struct state *state, __global struct item **ptr)
+float3	calc_light(__global struct item *illu, __global struct item *item, int item_index, struct opt opt,
+					float3 center, float3 direct, float t, struct state *state, __global struct item **ptr)
 {
 	float3		point, normal, illu_vec;
 	float		diffuse = 0.06, shine = 0, ratio = 0;
@@ -56,6 +54,7 @@ float3	calc_light(__global struct item *illu, __global struct item *item, int it
 		state->direct = direct;
 		*ptr = item + item_index;
 	}
+	normal *= outside(direct, normal);
 	point += normal * 0.001f;
 	for (int i = 0; i != opt.illu_c; i += 1)
 	{
@@ -74,8 +73,8 @@ float3	calc_light(__global struct item *illu, __global struct item *item, int it
 	return (((item + item_index)->attr.color * diffuse) + (float3){255, 255, 255} * shine);
 }
 
-float3	traceray(__global struct item *illu, __global struct item *item,
-		struct opt opt, float3 center, float3 direct, struct state *state, __global struct item **ptr)
+float3	traceray(__global struct item *illu, __global struct item *item, struct opt opt,
+					float3 center, float3 direct, struct state *state, __global struct item **ptr)
 {
 	float	t;
 	int		item_index;

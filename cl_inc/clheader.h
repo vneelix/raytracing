@@ -1,7 +1,7 @@
 #ifndef CLHEADER_H
 #define CLHEADER_H
 
-#define DPH 1
+#define DPH 2
 #define CLR (1 << DPH + 1) - 2
 #define STE (1 << DPH) / 2
 
@@ -49,12 +49,15 @@ float3	paraboloid_normal(__global struct item *item, float3 point, float3 center
 /*
 **	add func
 */
+void	swap(float *a, float *b);
+float	outside(float3 direct, float3 normal);
 float	scalar_multiple(float3 a, float3 b);
 float	get_rate(float a, float b);
 float	calc_ratio(float3 a, float3 b);
 float	angle(float3 a, float3 b);
-float3	get_reflect_vec(float3 vec, float3 normal);
-float3	get_refract_vec(float3 vec, float3 normal, float n);
+float3	get_reflect_vec(float3 direct, float3 normal);
+float3	get_refract_vec(float3 direct, float3 normal, float etat);
+float	fresnel(float3 direct, float3 normal, float etat);
 float3	rotation_x(float rad, float3 vec);
 float3	rotation_y(float rad, float3 vec);
 float	minimal_param(__global struct item *item,
