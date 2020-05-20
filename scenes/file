@@ -11,26 +11,26 @@ sphere {
     radius 1
     rgb (255, 0, 0)
 	shine 5000
-    reflect 0.2
+    reflect 0.4
 }
 sphere {
     center (2, 0, 4)
     radius 1
     rgb (0, 0, 255)
 	shine 5000
-    reflect 0.3
+    reflect 0.5
 }
 sphere {
     center (-2, 0, 4)
     radius 1
     rgb (0, 255, 0)
 	shine 5000
-    reflect 0.4
+    reflect 0.6
 }
 sphere {
     rgb (255, 255, 0)
     center (0, 5001, 0)
     radius 5000
 	shine 5000
-    reflect 0.5
+    reflect 0.3
 }

@@ -110,7 +110,7 @@ float3	get_direct(float3 *point, struct opt *opt)
 }
 
 void	create_set(__global struct item *illu, __global struct item *item,
-			struct opt opt, float3 *color, struct state *ptr, __global struct item **obj)
+			struct opt opt, float3 *color, struct state *ptr, __global struct item **obj, float *arr)
 {
 	int f = 0;
 	int	num = 2;
@@ -118,17 +118,22 @@ void	create_set(__global struct item *illu, __global struct item *item,
 	int	color_id = 0;
 	struct state state[STE * 2];
 
+	float out;
 	state[0] = *ptr;
 	for (int i = 0; i != DPH; i += 1)
 	{
 		for (int j = 0, k = 0; j != num; j += 2, k += 1)
 		{
-			if (obj[obj_id] != NULL && obj[obj_id]->attr.reflect != 0.f)
-				color[color_id] = traceray(illu, item, opt, state[f + k].point + state[f + k].normal * 0.001f, get_reflect_vec(
-					state[f + k].direct, state[f + k].normal), (i != (DPH - 1) ? state + (f == 0 ? STE : 0) + j : NULL), obj + color_id);
+			if (obj[obj_id] != NULL)
+				out = outside(state[f + k].direct, state[f + k].normal);
+			if (i != (DPH - 1) && obj[obj_id] != NULL && obj[obj_id]->attr.refract != 0.f)
+				arr[color_id] = fresnel(state[f + k].direct, state[f + k].normal, obj[obj_id]->attr.refract);
+			if (obj[obj_id] != NULL && (obj[obj_id]->attr.reflect != 0.f || obj[obj_id]->attr.refract != 0.f))
+				color[color_id] = traceray(illu, item, opt, state[f + k].point + state[f + k].normal * 0.001f * out, get_reflect_vec(
+					state[f + k].direct, state[f + k].normal), (i != (DPH - 1) ? state + (f == 0 ? STE : 0) + j : NULL), (i != (DPH - 1) ? obj + color_id : NULL));
 			if (obj[obj_id] != NULL && obj[obj_id]->attr.refract != 0.f)
-				color[color_id + 1] = traceray(illu, item, opt, state[f + k].point - state[f + k].normal * 0.001f, get_refract_vec(state[f + k].direct, state[f 
-					+ k].normal, obj[obj_id]->attr.refract), (i != (DPH - 1) ? state + (f == 0 ? STE : 0) + j + 1 : NULL), obj + color_id + 1);
+				color[color_id + 1] = traceray(illu, item, opt, state[f + k].point - state[f + k].normal * 0.001f * out, get_refract_vec(state[f + k].direct, state[f 
+					+ k].normal, obj[obj_id]->attr.refract), (i != (DPH - 1) ? state + (f == 0 ? STE : 0) + j + 1 : NULL), (i != (DPH - 1) ? obj + color_id + 1 : NULL));
 			color_id += 2;
 			obj_id += 1;
 		}
@@ -137,21 +142,26 @@ void	create_set(__global struct item *illu, __global struct item *item,
 	}
 }
 
-void	collapse_set(float3 *color, __global struct item **obj)
+void	collapse_set(float3 *color, __global struct item **obj, float *k)
 {
 	if (DPH != 1)
 	{
 		int active, next;
 		for (int i = (DPH - 1); i != 0; i -= 1)
 		{
-			for (active = (1 << i) - 2, next = (1 << (i + 1)) - 2; active != next; active += 2)
+			for (int j = 0, active = (1 << i) - 2, next = (1 << (i + 1)) - 2; active != next; j += 2, active += 1)
 			{
-				if (obj[active] != NULL)
-					color[active] = color[active] * (1.f - obj[active]->attr.reflect) + color[next] * obj[active]->attr.reflect;
+				if (obj[active] != NULL && obj[active]->attr.reflect != 0.f)
+					color[active] = color[active] * (1.f - obj[active]->attr.reflect) + color[next + j] * obj[active]->attr.reflect;
+				else if (obj[active] != NULL && obj[active]->attr.refract != 0.f)
+					color[active] = color[next + j] * k[active] + color[next + j + 1] * (1.f - k[active]);
 			}
 		}
 	}
-	color[-1] = color[-1] * (1.f - obj[-1]->attr.reflect) + color[0] * obj[-1]->attr.reflect;
+	if (obj[-1] != NULL && obj[-1]->attr.reflect != 0.f)
+		color[-1] = color[-1] * (1.f - obj[-1]->attr.reflect) + color[0] * obj[-1]->attr.reflect;
+	else if (obj[-1] != NULL && obj[-1]->attr.refract != 0.f)
+		color[-1] = color[0] * k[-1] + color[1] * (1.f - k[-1]);
 }
 
 __kernel void	main_func(__global uint *pixel,
@@ -162,14 +172,15 @@ __kernel void	main_func(__global uint *pixel,
 	float3	direct = get_direct(&point, &opt);
 
 	struct state state;
-	float3 color[CLR + 1] = {0};
-	__global struct item *obj[CLR + 1] = {NULL};
+	float3	color[CLR + 1] = {0};
+	float	k[CLR - (1 << DPH) + 1] = {0};
+	__global struct item *obj[CLR - (1 << DPH) + 1] = {NULL};
 
 	color[0] = traceray(illu, item, opt, opt.center, direct, &state, obj);
 	if (obj[0] != NULL)
 	{
-		create_set(illu, item, opt, color + 1, &state, obj + 1);
-		collapse_set(color + 1, obj + 1);
+		create_set(illu, item, opt, color + 1, &state, obj + 1, k);
+		collapse_set(color + 1, obj + 1, k + 1);
 	}
 	pixel[id] = rgb_to_uint(color[0]);
 }

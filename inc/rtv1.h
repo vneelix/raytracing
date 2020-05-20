@@ -6,7 +6,7 @@
 /*   By: vneelix <vneelix@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/03 12:47:38 by vneelix           #+#    #+#             */
-/*   Updated: 2020/05/19 15:28:46 by vneelix          ###   ########.fr       */
+/*   Updated: 2020/05/19 19:08:23 by vneelix          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,8 +100,8 @@ size_t		extract_param(char *string, t_item *item, __uint32_t *flags);
 size_t		get_item(t_item *item, char *file, __uint32_t pref, __uint32_t req);
 
 # define DIFFUSE 0.06
-# define W 800
-# define H 800
+# define W 900
+# define H 900
 
 #define	CENTER	1
 #define	VECTOR	2
