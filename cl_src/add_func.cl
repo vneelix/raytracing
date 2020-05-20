@@ -103,6 +103,19 @@ float3 rotation_y(float rad, float3 vec)
   return (ret);
 }
 
+uint	rgb_to_uint(float3 rgb)
+{
+	uint		color = 0;
+
+	rgb.x = rgb.x > 255 ? 255 : rgb.x;
+	rgb.y = rgb.y > 255 ? 255 : rgb.y;
+	rgb.z = rgb.z > 255 ? 255 : rgb.z;
+	color |= (uint)(rgb.z);
+	color |= (uint)(rgb.y) << 8;
+	color |= (uint)(rgb.x) << 16;
+	return (color);
+}
+
 float	minimal_param(__global struct item *item,
 	int count, float3 center, float3 direct, int *item_index)
 {

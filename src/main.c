@@ -6,7 +6,7 @@
 /*   By: vneelix <vneelix@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/24 20:17:14 by vneelix           #+#    #+#             */
-/*   Updated: 2020/05/20 16:42:01 by vneelix          ###   ########.fr       */
+/*   Updated: 2020/05/20 17:37:09 by vneelix          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,7 @@ int		main(int argc, char **argv)
 	SDL_SetRelativeMouseMode(SDL_ENABLE);
 	rt->opt.w = rt->sdl.surf->w;
 	rt->opt.h = rt->sdl.surf->h;
-	rt->opt.center = (cl_float3){{0, 0, 0}};
+	rt->opt.center = (cl_float3){{0, 0, -50.0}};
 	if ((source = cl_source()) == NULL)
 		return (-1);
 	if (opencl_init(&(rt->cl), source, rt))

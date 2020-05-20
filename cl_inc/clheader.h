@@ -62,4 +62,5 @@ float3	rotation_x(float rad, float3 vec);
 float3	rotation_y(float rad, float3 vec);
 float	minimal_param(__global struct item *item,
 			int count, float3 center, float3 direct, int *item_index);
+uint	rgb_to_uint(float3 rgb);
 #endif
