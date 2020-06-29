@@ -6,7 +6,7 @@
 /*   By: vneelix <vneelix@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/24 20:17:14 by vneelix           #+#    #+#             */
-/*   Updated: 2020/05/20 17:37:09 by vneelix          ###   ########.fr       */
+/*   Updated: 2020/06/27 18:35:55 by vneelix          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,21 +46,23 @@ int		main(int argc, char **argv)
 	t_rt	*rt;
 	char	**source;
 
+	argv = argv;
 	if (argc != 2)
 		return (-1);
 	rt = malloc(sizeof(t_rt));
 	ft_bzero(rt, sizeof(t_rt));
-	if (get_scene(rt, argv[1]))
+	/*if (get_scene(rt, argv[1]))
 	{
 		printf("Scene file error\n");
 		return (-1);
-	}
+	}*/
 	if (sdl_init(&(rt->sdl)))
 		return (-1);
 	SDL_SetRelativeMouseMode(SDL_ENABLE);
-	rt->opt.w = rt->sdl.surf->w;
-	rt->opt.h = rt->sdl.surf->h;
-	rt->opt.center = (cl_float3){{0, 0, -50.0}};
+	rt->opt.w = W;
+	rt->opt.h = H;
+	rt->opt.center = (cl_float3){{0, 0, 0}};
+	rt->sdl.ptr = malloc(rt->opt.w * rt->opt.h * 4);
 	if ((source = cl_source()) == NULL)
 		return (-1);
 	if (opencl_init(&(rt->cl), source, rt))
@@ -68,7 +70,9 @@ int		main(int argc, char **argv)
 		perror(NULL);
 		return (-1);
 	}
-	SDL_UpdateWindowSurface(rt->sdl.win);
+	SDL_UpdateTexture(rt->sdl.tex, NULL, rt->sdl.ptr, rt->opt.w * 4);
+	SDL_RenderCopy(rt->sdl.ren, rt->sdl.tex, NULL, NULL);
+	SDL_RenderPresent(rt->sdl.ren);
 	sdl_loop(&(rt->sdl), rt);
 	return (0);
 }

@@ -9,15 +9,14 @@ void	swap(float *a, float *b)
 	*b = buff;
 }
 
-float	outside(float3 direct, float3 normal)
-{
-	if (scalar_multiple(direct, normal) > 0.001)
-		return (-1);
-	return (1);
+float	IsOutside(float3 direct, float3 normal) {
+	if (dot(normalize(direct), normal) > 0.f) {
+		return -1;
+	}
+	return 1;
 }
 
-float	scalar_multiple(float3 a, float3 b)
-{
+float	DotProduct(float3 a, float3 b) {
 	return (a.x * b.x + a.y * b.y + a.z * b.z);
 }
 
@@ -32,26 +31,25 @@ float	get_rate(float a, float b)
 
 float	angle(float3 a, float3 b)
 {
-	return (acos(scalar_multiple(normalize(a), normalize(b))));
+	return (acos(DotProduct(normalize(a), normalize(b))));
 }
 
-float3	get_reflect_vec(float3 direct, float3 normal)
+float3	GetReflectVec(float3 direct, float3 normal)
 {
-	if (scalar_multiple(direct, normal) > 0.001)
-		normal = -normal;
-	return (normalize(2 * normal * scalar_multiple(-direct, normal) + direct));
+	return normalize(
+		2 * normal * dot(-direct, normal) + direct
+	);
 }
 
-float3	get_refract_vec(float3 direct, float3 normal, float etat)
+float3	GetRefractVec(float3 direct, float3 normal, float etat)
 {
 	float cosi, eta, etai, k;
 
 	etai = 1;
-	cosi = scalar_multiple(normalize(direct), normalize(normal));
+	cosi = DotProduct(normalize(direct), normalize(normal));
 	if (cosi < 0.001)
 		cosi = -cosi;
-	else
-	{
+	else {
 		normal = -normal;
 		swap(&etai, &etat);
 	}
@@ -63,23 +61,20 @@ float3	get_refract_vec(float3 direct, float3 normal, float etat)
 float	fresnel(float3 direct, float3 normal, float etat)
 {
 	float sint, cosi, etai;
-
 	etai = 1;
-	cosi = scalar_multiple(normalize(direct), normalize(normal));
-	if (cosi > 0.001)
+	cosi = DotProduct(normalize(direct), normalize(normal));
+	if (cosi > 1e-3)
 		swap(&etai, &etat);
 	sint = etai / etat * sqrt(max(0.f, 1.f - cosi * cosi));
-	if (sint >= 1.f)
-		return (1);
-	else
-	{
+	if (sint >= 1.f) {
+		return 1;
+	} else {
 		float cost, Rs, Rp;
-
 		cost = sqrt(max(0.f, 1.f - sint * sint));
 		cosi = fabs(cosi);
-		Rs = ((etat * cosi) - (etai * cost)) / ((etat * cosi) + (etai * cost));
-		Rp = ((etai * cosi) - (etat * cost)) / ((etai * cosi) + (etat * cost));
-		return ((Rs * Rs + Rp * Rp) / 2.f);
+		Rs = (etat * cosi - etai * cost) / (etat * cosi + etai * cost);
+		Rp = (etai * cosi - etat * cost) / (etai * cosi + etat * cost);
+		return (Rs * Rs + Rp * Rp) / 2.f;
 	}
 }
 
@@ -103,45 +98,51 @@ float3 rotation_y(float rad, float3 vec)
   return (ret);
 }
 
-uint	rgb_to_uint(float3 rgb)
-{
-	uint		color = 0;
-
-	rgb.x = rgb.x > 255 ? 255 : rgb.x;
-	rgb.y = rgb.y > 255 ? 255 : rgb.y;
-	rgb.z = rgb.z > 255 ? 255 : rgb.z;
+uint	RGBtoUint(float3 rgb) {
+	uint	color = 0;
+	rgb.x = clamp(0.f, 255.f, rgb.x);
+	rgb.y = clamp(0.f, 255.f, rgb.y);
+	rgb.z = clamp(0.f, 255.f, rgb.z);
 	color |= (uint)(rgb.z);
 	color |= (uint)(rgb.y) << 8;
 	color |= (uint)(rgb.x) << 16;
 	return (color);
 }
 
-float	minimal_param(__global struct item *item,
-	int count, float3 center, float3 direct, int *item_index)
-{
-	float t, min;
+bool	SolveQuadratic(float a, float b, float c, float *t1, float *t2) {
+	float d = b * b - 4 * a * c;
+	if (d < 0) {
+		return (false);
+	} else {
+		d = sqrt(d);
+		*t1 = (-b + d) / (2 * a);
+		*t2 = (-b - d) / (2 * a);
+		if (*t1 > *t2) {
+			swap(t1, t2);
+		}
+		return (true);
+	}
+}
 
-	min = INFINITY;
-	for (int i = 0; i != count; i += 1)
-	{
-		if ((item + i)->type == 0)
-			t = plane(item + i, center, direct);
-		else if ((item + i)->type == 1)
-			t = sphere(item + i, center, direct);
-		else if ((item + i)->type == 2)
-			t = cylinder(item + i, center, direct);
-		else if ((item + i)->type == 3)
-			t = cone(item + i, center, direct);
-		else if ((item + i)->type == 4)
-			t = paraboloid(item + i, center, direct);
-		else
-			t = INFINITY;
-		if (t < min)
-		{
-			min = t;
-			if (item_index != NULL)
-				*item_index = i;
+float3	GetPointOnHemisphere(float k, float alpha) {
+	k = clamp(0.0f, 1.f, k);
+	alpha = clamp(0.0f, (float)(2 * M_PI), alpha);
+	return (float3){
+		sqrt(k) * cos(alpha),
+		sqrt(k) * sin(alpha),
+		sqrt(1.f - k)
+	};
+}
+
+void		GetDistributionOnHemisphere(float3 *dist, uint circleNumber, int circlePartNumber) {
+	float delta_k = 1.f / circleNumber;
+	float	delta_alpha = (2 * M_PI) / circlePartNumber;
+	dist += 1;
+	for (int i = 0; i != circleNumber; i += 1) {
+		for (int j = 0; j != circlePartNumber; j += 1) {
+			dist[i + circleNumber * j] = GetPointOnHemisphere(delta_k * (i + 1), delta_alpha * (j + 1));
 		}
 	}
-	return (min);
+	dist -= 1;
+	dist[0] = GetPointOnHemisphere(0, 0);
 }

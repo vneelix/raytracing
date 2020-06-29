@@ -1,0 +1,10 @@
+#ifndef QUATERNION_H
+#define QUATERNION_H
+float4	HamiltonProduct(float4 q1, float4 q2);
+float4	ConjugatedQuat(float4 q);
+float4	QuaternionNorm(float4 q);
+float4	ReverseQuat(float4 q);
+float4	ToQuaternion(float x, float y, float z);
+float3	Rotation(float3 object, float x, float y, float z, int reverse);
+float3	RotationAround(float3 around, float3 object, float x, float y, float z, int reverse);
+#endif

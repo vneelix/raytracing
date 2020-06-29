@@ -6,7 +6,7 @@
 /*   By: vneelix <vneelix@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/03 12:47:38 by vneelix           #+#    #+#             */
-/*   Updated: 2020/05/19 19:08:23 by vneelix          ###   ########.fr       */
+/*   Updated: 2020/06/28 15:58:01 by vneelix          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,44 +25,55 @@
 #endif
 # include "libft.h"
 
-typedef struct	s_opencl{
-	cl_platform_id		platform_id;
-	cl_device_id		device_id;
-	cl_context			context;
-	cl_command_queue	command_queue;
-	cl_program			program;
-	cl_mem				memobj[3];
-	cl_kernel			kernel;
-	cl_event			event;
-}				t_opencl;
+typedef struct	s_cl{
+	cl_platform_id		platform;
+	cl_device_id			device;
+	cl_context				context;
+	cl_command_queue	queue;
+	cl_program				program;
+	cl_mem						memory[4];
+	cl_kernel					rt_kernel, genhemisphere_kernel;
+}				t_cl;
 
 typedef struct	s_sdl{
-	SDL_Window	*win;
-	SDL_Surface	*surf;
-	SDL_Event	event;
+	uint32_t		*ptr;
+	SDL_Window		*win;
+	SDL_Texture		*tex;
+	SDL_Renderer	*ren;
+	SDL_Event		event;
 }				t_sdl;
 
-typedef struct __attribute__ ((packed)) s_pref{
+typedef enum __attribute__ ((packed)) m_itype {
+	POINT,
+	PLANE,
+	SPHERE,
+	CYLINDER,
+	CONE,
+	ELLIPSOID,
+	PARABOLOID,
+	BOX
+} t_itype;
+
+typedef struct __attribute__ ((packed)) item {
+	/*
+	** Item params
+	*/
+	t_itype		type;
 	cl_float3	center;
+	cl_float3	normal;
 	cl_float3	vector;
-	cl_float	radius;
-	cl_float	min;
-	cl_float	max;
-	cl_float	k;
-}	t_pref;
-
-typedef struct	__attribute__ ((packed)) s_attr{
+	cl_float3	vMin, vMax;
+	cl_float	radius, min, max, k;
+	/*
+	** Item properties
+	*/
 	cl_float3	color;
-	cl_float	shine;
-	cl_float	reflect;
-	cl_float	refract;
-}	t_attr;
-
-typedef struct __attribute__ ((packed)) s_item{
-	t_pref	pref;
-	t_attr	attr;
-	cl_int	type;
-}	t_item;
+	cl_float	reflectRatio, refractRatio, shineRatio;
+	/*
+	** Euler angles
+	*/
+	cl_float	x, y, z;
+} t_item;
 
 typedef struct __attribute__ ((packed)) s_opt{
 	cl_int		w;
@@ -76,15 +87,15 @@ typedef struct __attribute__ ((packed)) s_opt{
 
 typedef struct	s_rt
 {
-	t_opencl	cl;
+	t_cl		cl;
 	t_sdl		sdl;
 	t_opt		opt;
-	t_item		*illu;
-	t_item		*item;
+	t_item	*illu;
+	t_item	*item;
 }				t_rt;
 
-cl_int		opencl_launch(t_opencl *cl, t_rt *rt);
-cl_int		opencl_init(t_opencl *cl, char **sources, t_rt *rt);
+cl_int		opencl_launch(t_cl *cl, t_rt *rt);
+cl_int		opencl_init(t_cl *cl, char **sources, t_rt *rt);
 
 size_t		ft_splits(char *s);
 size_t		ft_number(char *s);

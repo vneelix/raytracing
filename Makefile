@@ -6,7 +6,7 @@
 #    By: vneelix <vneelix@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/02/26 14:32:38 by vneelix           #+#    #+#              #
-#    Updated: 2020/05/02 03:38:32 by vneelix          ###   ########.fr        #
+#    Updated: 2020/06/07 16:23:30 by vneelix          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -36,13 +36,13 @@ MODE = RELEASE
 
 $(OPATH)%.o: $(SPATH)%.c $(INC)
 ifeq ($(MODE), debug)
-	clang $(CDFLAGS) $< -o $@
+	gcc $(CDFLAGS) $< -o $@
 else
-	clang $(CRFLAGS) $< -o $@
+	gcc $(CRFLAGS) $< -o $@
 endif
 
 $(NAME): $(OBJ)
-	clang -Wall -Wextra -Werror $^ $(LFLAGS)
+	gcc -Wall -Wextra -Werror $^ $(LFLAGS)
 
 all: $(NAME)
 

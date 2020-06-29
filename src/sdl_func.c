@@ -11,10 +11,16 @@ int		sdl_init(t_sdl *sdl)
 		SDL_Quit();
 		return (-1);
 	}
-	if ((sdl->surf = SDL_GetWindowSurface(sdl->win)) == NULL)
+	if ((sdl->ren = SDL_CreateRenderer(sdl->win, -1, SDL_RENDERER_ACCELERATED)) == NULL)
 	{
 		SDL_DestroyWindow(sdl->win);
 		SDL_Quit();
+		return (-1);
+	}
+	if ((sdl->tex = SDL_CreateTexture(sdl->ren, SDL_PIXELFORMAT_BGRA32, SDL_TEXTUREACCESS_STREAMING, W, H)) == NULL)
+	{
+		SDL_DestroyRenderer(sdl->ren);
+		SDL_DestroyWindow(sdl->win);
 		return (-1);
 	}
 	return (0);
@@ -30,8 +36,8 @@ void	correct_queue(void)
 
 int		sdl_mousehook(t_sdl *sdl, t_rt *rt)
 {
-	rt->opt.spin_y += atanf(0.05 * sdl->event.motion.xrel) * 180.f / M_PI;
-	rt->opt.spin_x -= atanf(0.05 * sdl->event.motion.yrel) * 180.f / M_PI;
+	rt->opt.spin_x -= atanf(0.05 * sdl->event.motion.yrel);
+	rt->opt.spin_y += atanf(0.05 * sdl->event.motion.xrel);
 	return (1);
 }
 
@@ -77,11 +83,12 @@ int		sdl_loop(t_sdl *sdl, t_rt *rt)
 			if (ret)
 			{
 				ret = opencl_launch(&(rt->cl), rt);
-				SDL_UpdateWindowSurface(rt->sdl.win);
+				SDL_UpdateTexture(sdl->tex, NULL, sdl->ptr, rt->opt.w * 4);
+				SDL_RenderCopy(sdl->ren, sdl->tex, NULL, NULL);
+				SDL_RenderPresent(sdl->ren);
 			}
 			correct_queue();
 		}
 	}
-	clReleaseCommandQueue(rt->cl.command_queue);
 	return (0);
 }
