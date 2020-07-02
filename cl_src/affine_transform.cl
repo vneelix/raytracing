@@ -32,7 +32,7 @@ float3	objToBasis(float3 obj, float3 orig, float3 *basis, int pointFlag) {
 	return newObj;
 }
 
-void		CreateBasis(float3 *basis) {
+void		BuildBasis(float3 *basis) {
 	if (basis[0].x == 0) {
 		basis[1] = (float3){1, 0, 0};
 	} else if (basis[0].y == 0) {

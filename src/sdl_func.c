@@ -36,8 +36,8 @@ void	correct_queue(void)
 
 int		sdl_mousehook(t_sdl *sdl, t_rt *rt)
 {
-	rt->opt.spin_x -= atanf(0.05 * sdl->event.motion.yrel);
-	rt->opt.spin_y += atanf(0.05 * sdl->event.motion.xrel);
+	rt->opt.spin_x -= atanf(sdl->event.motion.yrel) * 0.01;
+	rt->opt.spin_y += atanf(sdl->event.motion.xrel) * 0.02;
 	return (1);
 }
 
@@ -56,7 +56,7 @@ int		sdl_keyhook(SDL_Keycode keycode, t_rt *rt)
 		(rt->opt.center.s)[0] += 0.5;
 	else if (keycode == SDLK_RETURN)
 		(rt->opt.center.s)[1] -= 0.5;
-	else if (keycode == SDLK_RSHIFT)
+	else if (keycode == SDLK_BACKSPACE)
 		(rt->opt.center.s)[1] += 0.5;
 	return (1);
 }

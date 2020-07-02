@@ -1,7 +1,7 @@
 #include "clheader.h"
 
 float3 CylinderNormal(__global struct item *item, float3 *orig, float3 *dir, float3 *point, float t) {
-	float m = DotProduct(*dir, item->vector) * t + DotProduct(*orig - item->center, item->vector);
+	float m = dot(*dir, item->vector) * t + dot(*orig - item->center, item->vector);
 	return (normalize(*point - item->center - item->vector * m));
 }
 
@@ -11,13 +11,13 @@ float CylinderRestrict(__global struct item *item, float3 *orig, float3 *dir, fl
 	}
 	float3 OC = *orig - item->center;
 	if (t0 > 0.f) {
-		float m = DotProduct(*dir, item->vector) * t0 + DotProduct(OC, item->vector);
+		float m = dot(*dir, item->vector) * t0 + dot(OC, item->vector);
 		if (m >= item->min && m <= item->max) {
 			return (t0);
 		}
 	}
 	if (t1 > 0.f) {
-		float m = DotProduct(*dir, item->vector) * t1 + DotProduct(OC, item->vector);
+		float m = dot(*dir, item->vector) * t1 + dot(OC, item->vector);
 		if (m >= item->min && m <= item->max) {
 			return (t1);
 		}
@@ -27,9 +27,9 @@ float CylinderRestrict(__global struct item *item, float3 *orig, float3 *dir, fl
 
 float	CylinderIntersect(__global struct item *item, float3 *orig, float3 *dir) {
 	float3 OC = *orig - item->center;
-	float a = DotProduct(*dir, *dir) - pow(DotProduct(*dir, item->vector), 2);
-	float b = 2 * (DotProduct(*dir, OC) - DotProduct(*dir, item->vector) * DotProduct(OC, item->vector));
-	float	c = DotProduct(OC, OC) - pow(DotProduct(OC, item->vector), 2) - pow(item->radius, 2);
+	float a = dot(*dir, *dir) - pow(dot(*dir, item->vector), 2.f);
+	float b = 2 * (dot(*dir, OC) - dot(*dir, item->vector) * dot(OC, item->vector));
+	float	c = dot(OC, OC) - pow(dot(OC, item->vector), 2.f) - pow(item->radius, 2.f);
 
 	float t0, t1;
 	if (!SolveQuadratic(a, b, c, &t0, &t1)) {

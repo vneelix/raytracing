@@ -6,7 +6,7 @@
 /*   By: vneelix <vneelix@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/03 12:47:38 by vneelix           #+#    #+#             */
-/*   Updated: 2020/06/28 15:58:01 by vneelix          ###   ########.fr       */
+/*   Updated: 2020/07/01 17:54:27 by vneelix          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,8 +16,8 @@
 # include <stdio.h>
 # include <errno.h>
 # include <math.h>
-# include <SDL2/SDL.h>
-# include <SDL2/SDL_keyboard.h>
+# include "SDL2/SDL.h"
+# include "SDL2/SDL_keyboard.h"
 #ifdef __APPLE__
 # include <OpenCL/opencl.h>
 #else
@@ -43,7 +43,7 @@ typedef struct	s_sdl{
 	SDL_Event		event;
 }				t_sdl;
 
-typedef enum __attribute__ ((packed)) m_itype {
+typedef enum m_itype {
 	POINT,
 	PLANE,
 	SPHERE,
@@ -54,7 +54,7 @@ typedef enum __attribute__ ((packed)) m_itype {
 	BOX
 } t_itype;
 
-typedef struct __attribute__ ((packed)) item {
+typedef struct item {
 	/*
 	** Item params
 	*/
@@ -75,7 +75,7 @@ typedef struct __attribute__ ((packed)) item {
 	cl_float	x, y, z;
 } t_item;
 
-typedef struct __attribute__ ((packed)) s_opt{
+typedef struct s_opt{
 	cl_int		w;
 	cl_int		h;
 	cl_int		illu_c;
@@ -111,8 +111,8 @@ size_t		extract_param(char *string, t_item *item, __uint32_t *flags);
 size_t		get_item(t_item *item, char *file, __uint32_t pref, __uint32_t req);
 
 # define DIFFUSE 0.06
-# define W 900
-# define H 900
+# define W 800
+# define H 800
 
 #define	CENTER	1
 #define	VECTOR	2

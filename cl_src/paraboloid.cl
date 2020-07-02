@@ -1,11 +1,11 @@
 #include "clheader.h"
 
-float3 ParaboloidNormal(__global struct item *item, float3 *orig, float3 *dir, float3 *point, float t) {
+float3 ParaboloidNormal(global struct item *item, float3 *orig, float3 *dir, float3 *point, float t) {
 	float m = dot(*dir, item->vector) * t + dot(*orig - item->center, item->vector);
 	return (normalize(*point - item->center - item->vector * (m + item->k)));
 }
 
-float ParaboloidRestrict(__global struct item *item, float3 *orig, float3 *dir, float t0, float t1) {
+float ParaboloidRestrict(global struct item *item, float3 *orig, float3 *dir, float t0, float t1) {
 	if (t0 < 0.f && t1 < 0.f) {
 		return (INFINITY);
 	}
@@ -25,7 +25,7 @@ float ParaboloidRestrict(__global struct item *item, float3 *orig, float3 *dir, 
 	return (INFINITY);
 }
 
-float	ParaboloidIntersect(__global struct item *item, float3 *orig, float3 *dir) {
+float	ParaboloidIntersect(global struct item *item, float3 *orig, float3 *dir) {
 	float3 OC = *orig - item->center;
 	float a = dot(*dir, *dir) - pow(dot(*dir, item->vector), 2);
 	float b = 2 * (dot(*dir, OC) - dot(*dir, item->vector) * (dot(OC, item->vector) + 2 * item->k));

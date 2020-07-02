@@ -6,7 +6,7 @@
 /*   By: vneelix <vneelix@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/24 20:17:14 by vneelix           #+#    #+#             */
-/*   Updated: 2020/06/27 18:35:55 by vneelix          ###   ########.fr       */
+/*   Updated: 2020/07/02 13:14:55 by vneelix          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,21 +20,17 @@ char	**cl_source(void)
 	char	**file;
 	size_t	num_files;
 
-	if ((file = ft_directory("cl_src", &num_files)) == NULL)
+	if ((file = ft_directory("cl_src/", &num_files)) == NULL)
 		return (NULL);
 	if ((ret = (char**)ft_memalloc(sizeof(char*) * (num_files + 1))) == NULL)
 		return (nptr_del((void**)file));
 	i = 0;
 	while (i != num_files)
 	{
-		if ((ptr = ft_strjoin("cl_src/", file[i])) == NULL)
+		if ((ret[i] = ft_getfile(file[i], 0)) == NULL)
 			break ;
-		if ((ret[i++] = ft_getfile(ptr, 0)) == NULL)
-			break ;
-		ft_memdel(ptr);
+		i += 1;
 	}
-	ptr = (i == num_files ? NULL : ptr);
-	ft_memdel(ptr);
 	nptr_del((void**)file);
 	if (i != num_files)
 		return (nptr_del((void**)ret));
@@ -61,7 +57,8 @@ int		main(int argc, char **argv)
 	SDL_SetRelativeMouseMode(SDL_ENABLE);
 	rt->opt.w = W;
 	rt->opt.h = H;
-	rt->opt.center = (cl_float3){{0, 0, 0}};
+	rt->opt.spin_x = -15 * M_PI / 180.f;
+	rt->opt.center = (cl_float3){{0, -22, 0}};
 	rt->sdl.ptr = malloc(rt->opt.w * rt->opt.h * 4);
 	if ((source = cl_source()) == NULL)
 		return (-1);

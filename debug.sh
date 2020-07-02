@@ -1,1 +1,1 @@
-clang -g -O0 -Iinc src/* ../libft/src/* -lm -lSDL2 -lOpenCL -o RTv1
+gcc -g -O0 -Iinc src/* ../libft/src/* -lm -Llib -lSDL2 -framework OpenCL -o RT

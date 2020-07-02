@@ -2,9 +2,7 @@
 
 void	swap(float *a, float *b)
 {
-	float buff;
-
-	buff = *a;
+	float buff = *a;
 	*a = *b;
 	*b = buff;
 }
@@ -14,24 +12,6 @@ float	IsOutside(float3 direct, float3 normal) {
 		return -1;
 	}
 	return 1;
-}
-
-float	DotProduct(float3 a, float3 b) {
-	return (a.x * b.x + a.y * b.y + a.z * b.z);
-}
-
-float	get_rate(float a, float b)
-{
-	if (a < 0 && b < 0)
-		return (INFINITY);
-	if ((a < b && a > 0 && b > 0) || (a > b && a > 0 && b < 0))
-		return (a);
-	return (b);
-}
-
-float	angle(float3 a, float3 b)
-{
-	return (acos(DotProduct(normalize(a), normalize(b))));
 }
 
 float3	GetReflectVec(float3 direct, float3 normal)
@@ -46,7 +26,7 @@ float3	GetRefractVec(float3 direct, float3 normal, float etat)
 	float cosi, eta, etai, k;
 
 	etai = 1;
-	cosi = DotProduct(normalize(direct), normalize(normal));
+	cosi = dot(normalize(direct), normalize(normal));
 	if (cosi < 0.001)
 		cosi = -cosi;
 	else {
@@ -62,7 +42,7 @@ float	fresnel(float3 direct, float3 normal, float etat)
 {
 	float sint, cosi, etai;
 	etai = 1;
-	cosi = DotProduct(normalize(direct), normalize(normal));
+	cosi = dot(normalize(direct), normalize(normal));
 	if (cosi > 1e-3)
 		swap(&etai, &etat);
 	sint = etai / etat * sqrt(max(0.f, 1.f - cosi * cosi));
@@ -76,26 +56,6 @@ float	fresnel(float3 direct, float3 normal, float etat)
 		Rp = (etai * cosi - etat * cost) / (etai * cosi + etat * cost);
 		return (Rs * Rs + Rp * Rp) / 2.f;
 	}
-}
-
-float3 rotation_x(float rad, float3 vec)
-{
-  float3	ret;
-
-  ret.x = vec.x;
-  ret.y = vec.y * cos(rad) - vec.z * sin(rad);
-  ret.z = vec.y * sin(rad) + vec.z * cos(rad);
-  return (ret);
-}
-
-float3 rotation_y(float rad, float3 vec)
-{
-  float3	ret;
-
-  ret.x = vec.x * cos(rad) + vec.z * sin(rad);
-  ret.y = vec.y;
-  ret.z = vec.x * -(sin(rad)) + vec.z * cos(rad);
-  return (ret);
 }
 
 uint	RGBtoUint(float3 rgb) {
@@ -134,7 +94,7 @@ float3	GetPointOnHemisphere(float k, float alpha) {
 	};
 }
 
-void		GetDistributionOnHemisphere(float3 *dist, uint circleNumber, int circlePartNumber) {
+void		GetDistributionOnHemisphere(float3 *dist, int circleNumber, int circlePartNumber) {
 	float delta_k = 1.f / circleNumber;
 	float	delta_alpha = (2 * M_PI) / circlePartNumber;
 	dist += 1;
@@ -145,4 +105,8 @@ void		GetDistributionOnHemisphere(float3 *dist, uint circleNumber, int circlePar
 	}
 	dist -= 1;
 	dist[0] = GetPointOnHemisphere(0, 0);
+}
+
+void		PrintVec3f(float3 vec3f) {
+	printf("%f,%f,%f\n", vec3f.x, vec3f.y, vec3f.z);
 }

@@ -8,7 +8,9 @@
 #define CLR (1 << DPH + 1) - 2
 #define STE (1 << DPH) / 2
 
-enum __attribute__ ((packed)) iType {
+#define NULL (void*)(0)
+
+enum iType {
 	POINT,
 	PLANE,
 	SPHERE,
@@ -28,7 +30,7 @@ struct RT_Data {
 	int distributionSize;
 };
 
-struct __attribute__ ((packed)) item {
+struct item {
 	/*
 	** Item params
 	*/
@@ -49,7 +51,7 @@ struct __attribute__ ((packed)) item {
 	float				x, y, z;
 };
 
-struct __attribute__ ((packed)) opt {
+struct opt {
 	int		w;
 	int		h;
 	int		illu_c;
@@ -59,9 +61,6 @@ struct __attribute__ ((packed)) opt {
 	float3	center;
 };
 
-/*
-** Intersect
-*/
 float	PlaneIntersect(__global struct item *item, float3 *orig, float3 *dir);
 float	SphereIntersect(__global struct item *item, float3 *orig, float3 *dir);
 float	CylinderIntersect(__global struct item *item, float3 *orig, float3 *dir);
@@ -69,48 +68,21 @@ float	ConeIntersect(__global struct item *item, float3 *orig, float3 *dir);
 float	EllipsoidIntersect(__global struct item *item, float3 *orig, float3 *dir);
 float	ParaboloidIntersect(__global struct item *item, float3 *orig, float3 *dir);
 float	BoxIntersect(__global struct item *item, float3 *orig, float3 *dir);
-/*
-**
-*/
-
-/*
-** Normal
-*/
 float3 CylinderNormal(__global struct item *item, float3 *orig, float3 *dir, float3 *point, float t);
 float3 ConeNormal(__global struct item *item, float3 *orig, float3 *dir, float3 *point, float t);
 float3 EllipsoidNormal(__global struct item *item, float3 *orig, float3 *dir, float3 *point, float t);
 float3 ParaboloidNormal(__global struct item *item, float3 *orig, float3 *dir, float3 *point, float t);
 float3 BoxNormal(__global struct item *item, float3 *point);
-/*
-**
-*/
 
-
-/*
-**	add func
-*/
-void	swap(float *a, float *b);
-float	IsOutside(float3 direct, float3 normal);
-float	DotProduct(float3 a, float3 b);
-float3 CrossProduct(float3 a, float3 b);
-float	get_rate(float a, float b);
-float	calc_ratio(float3 a, float3 b);
-float	angle(float3 a, float3 b);
+void		swap(float *a, float *b);
+float		IsOutside(float3 direct, float3 normal);
 float3	GetReflectVec(float3 direct, float3 normal);
 float3	GetRefractVec(float3 direct, float3 normal, float etat);
-float	fresnel(float3 direct, float3 normal, float etat);
-float3	rotation_x(float rad, float3 vec);
-float3	rotation_y(float rad, float3 vec);
-float	minimal_param(__global struct item *item,
-			int count, float3 center, float3 direct, int *item_index);
-uint	RGBtoUint(float3 rgb);
-
-bool	SolveQuadratic(float a, float b, float c, float *t1, float *t2);
-
-void PrintVec3f(float3 vec3f) {
-	printf("%f,%f,%f\n", vec3f.x, vec3f.y, vec3f.z);
-}
-
+float		fresnel(float3 direct, float3 normal, float etat);
+uint		RGBtoUint(float3 rgb);
+bool		SolveQuadratic(float a, float b, float c, float *t1, float *t2);
 float3	GetPointOnHemisphere(float k, float alpha);
-void		GetDistributionOnHemisphere(float3 *dist, uint circleNumber, int circlePartNumber);
+void		GetDistributionOnHemisphere(float3 *dist, int circleNumber, int circlePartNumber);
+
+void		PrintVec3f(float3 vec3f);
 #endif
