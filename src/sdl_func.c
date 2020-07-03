@@ -36,7 +36,7 @@ void	correct_queue(void)
 
 int		sdl_mousehook(t_sdl *sdl, t_rt *rt)
 {
-	rt->opt.spin_x -= atanf(sdl->event.motion.yrel) * 0.01;
+	rt->opt.spin_x -= atanf(sdl->event.motion.yrel) * 0.02;
 	rt->opt.spin_y += atanf(sdl->event.motion.xrel) * 0.02;
 	return (1);
 }

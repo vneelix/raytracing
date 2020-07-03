@@ -38,7 +38,7 @@ float3	GetRefractVec(float3 direct, float3 normal, float etat)
     return (k < 0 ? 0 : eta * direct + (eta * cosi - sqrt(k)) * normal);
 }
 
-float	fresnel(float3 direct, float3 normal, float etat)
+float	FresnelRatio(float3 direct, float3 normal, float etat)
 {
 	float sint, cosi, etai;
 	etai = 1;
@@ -105,8 +105,4 @@ void		GetDistributionOnHemisphere(float3 *dist, int circleNumber, int circlePart
 	}
 	dist -= 1;
 	dist[0] = GetPointOnHemisphere(0, 0);
-}
-
-void		PrintVec3f(float3 vec3f) {
-	printf("%f,%f,%f\n", vec3f.x, vec3f.y, vec3f.z);
 }

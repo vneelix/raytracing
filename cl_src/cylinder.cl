@@ -1,5 +1,7 @@
 #include "clheader.h"
 
+float CylinderRestrict(__global struct item *item, float3 *orig, float3 *dir, float t0, float t1);
+
 float3 CylinderNormal(__global struct item *item, float3 *orig, float3 *dir, float3 *point, float t) {
 	float m = dot(*dir, item->vector) * t + dot(*orig - item->center, item->vector);
 	return (normalize(*point - item->center - item->vector * m));

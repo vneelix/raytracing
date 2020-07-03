@@ -19,6 +19,11 @@ cl_int		opencl_memobj(t_cl *cl, t_rt *rt)
 		return (ret);
 	return (0);
 }
+
+void		PrintVec3f(cl_float3 vec3f) {
+	printf("%f,%f,%f\n", vec3f.s[0], vec3f.s[1], vec3f.s[2]);
+}
+
 cl_int		opencl_launch(t_cl *cl, t_rt *rt)
 {
 	cl_int	ret;
@@ -68,9 +73,9 @@ cl_int		opencl_program(t_cl *cl, char **sources)
 		printf("%s\n", log);
 	} */
 	{
-		const char *src[7] = {
+		const char *src[8] = {
 			ft_getfile("cl_src/add_func.cl", 0),
-			//ft_getfile("cl_src/cylinder.cl", 0),
+			ft_getfile("cl_src/cylinder.cl", 0),
 			//ft_getfile("cl_src/paraboloid.cl", 0),
 			ft_getfile("cl_src/affine_transform.cl", 0),
 			//ft_getfile("cl_src/ellipsoid.cl", 0),
@@ -97,9 +102,9 @@ cl_int		opencl_program(t_cl *cl, char **sources)
 			"clheader.h",
 			"quaternion.h"
 		};
-		cl_program input_program[7];
-		ft_bzero(input_program, sizeof(cl_program) * 6);
-		for (int i = 0; i != 7; i += 1) {
+		cl_program input_program[8];
+		ft_bzero(input_program, sizeof(cl_program) * 8);
+		for (int i = 0; i != 8; i += 1) {
 			input_program[i] = clCreateProgramWithSource(cl->context, 1, src + i, NULL, &ret);
 			ret = clCompileProgram(input_program[i], 0, NULL, "-Werror", 3, input_header, (const char**)input_header_name, NULL, NULL);
 			{
@@ -117,7 +122,7 @@ cl_int		opencl_program(t_cl *cl, char **sources)
 				exit(0);
 			}
 		}
-		cl->program = clLinkProgram(cl->context, 1, &cl->device, NULL, 7, input_program, NULL, NULL, &ret);
+		cl->program = clLinkProgram(cl->context, 1, &cl->device, NULL, 8, input_program, NULL, NULL, &ret);
 		if (ret) {
 			exit(0);
 		}
@@ -141,18 +146,19 @@ cl_int		opencl_program(t_cl *cl, char **sources)
 };*/
 
 void	figure_init(t_rt *rt) {
-	rt->opt.illu_c = 1;
-	rt->opt.item_c = 5;
+	rt->opt.illu_c = 0;
+	rt->opt.item_c = 6;
 
 	rt->illu = malloc(sizeof(t_item) * rt->opt.illu_c);
 	rt->item = malloc(sizeof(t_item) * rt->opt.item_c);
 
-	rt->illu[0] = (t_item){SPHERE, {0, -32, 64}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, 4, 0, 0, 0.6, {255, 255, 255}, 0, 0, 0};
-	rt->item[0] = (t_item){SPHERE, {0, 0, 64}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, 8, 0, 0, 0, {255, 204, 204}, 0, 0, 0};
-	rt->item[1] = (t_item){PLANE, {0, 12, 64}, {0, -1, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, 0, 40, 40, 0, {153, 179, 255}, 0, 0, 0};
-	rt->item[2] = (t_item){PLANE, {-20, -8, 64}, {1, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, 0, 40, 40, 0, {204, 255, 255}, 0, 0, 0};
-	rt->item[3] = (t_item){PLANE, {20, -8, 64}, {-1, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, 0, 40, 40, 0, {204, 204, 255}, 0, 0, 0};
-	rt->item[4] = (t_item){PLANE, {0, -8, 84}, {0, 0, -1}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, 0, 40, 40, 0, {255, 204, 230}, 0, 0, 0};
+	//rt->illu[0] = (t_item){POINT, {0, -32, 32}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, 4, 0, 0, 0.6, {255, 255, 255}, 0, 0, 0};
+	rt->item[0] = (t_item){SPHERE, {0, 0, 64}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, 12, 0, 0, 0, {255, 255, 255}, 0, 0, 5000};
+	rt->item[1] = (t_item){PLANE, {0, 20, 64}, {0, -1, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, 0, 0, 0, 0, {255, 255, 255}, 0, 0, 0};
+	rt->item[2] = (t_item){PLANE, {-20, 0, 64}, {1, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, 0, 40, 40, 0, {255, 255, 255}, 0, 0, 0};
+	rt->item[3] = (t_item){PLANE, {20, 0, 64}, {-1, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, 0, 40, 40, 0, {255, 255, 255}, 0, 0, 0};
+	rt->item[4] = (t_item){PLANE, {0, 0, 84}, {0, 0, -1}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, 0, 40, 40, 0, {255, 255, 255}, 0, 0, 0};
+	rt->item[5] = (t_item){PLANE, {0, -20, 64}, {0, 1, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, 0, 40, 40, 0, {255, 255, 255}, 0, 0, 0};
 }
 
 cl_int	platform_device_init(t_cl *cl)
@@ -179,7 +185,7 @@ cl_int	contex_queue_init(t_cl *cl) {
 }
 
 void	func(t_cl *cl) {
-	cl_int ret, a = 4, b = 16;
+	cl_int ret, a = 8, b = 16;
 	size_t worksize = a * b + 1;
 
 	cl->memory[3] = clCreateBuffer(cl->context, CL_MEM_READ_WRITE, sizeof(cl_float3) * worksize, NULL, &ret);
