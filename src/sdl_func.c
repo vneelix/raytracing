@@ -38,14 +38,23 @@ int		sdl_mousehook(t_sdl *sdl, t_rt *rt)
 {
 	rt->opt.spin_x -= atanf(sdl->event.motion.yrel) * 0.02;
 	rt->opt.spin_y += atanf(sdl->event.motion.xrel) * 0.02;
+	/* rt->opt.spin_x -= sdl->event.motion.yrel * 0.017453;
+	rt->opt.spin_y += sdl->event.motion.xrel * 0.017453;
+	if (fabs(rt->opt.spin_x) > M_PI) {
+		rt->opt.spin_x = (M_PI - (M_PI - fabs(rt->opt.spin_x))) * (rt->opt.spin_x < 0 ? -1.f : 1.f);
+	}
+	if (fabs(rt->opt.spin_y) > M_PI) {
+		rt->opt.spin_y = (M_PI - (M_PI - fabs(rt->opt.spin_y))) * (rt->opt.spin_y < 0 ? -1.f : 1.f);
+	} */
 	return (1);
 }
 
 int		sdl_keyhook(SDL_Keycode keycode, t_rt *rt)
 {
-	/*if (!(keycode == SDLK_UP || keycode == SDLK_DOWN
-		|| keycode == SDLK_LEFT || keycode == SDLK_RIGHT))
-		return (0);*/
+	if (!(keycode == SDLK_UP || keycode == SDLK_DOWN
+		|| keycode == SDLK_LEFT || keycode == SDLK_RIGHT
+			|| keycode == SDLK_RETURN || keycode == SDLK_BACKSPACE))
+		return (0);
 	if (keycode == SDLK_UP)
 		(rt->opt.center.s)[2] += 0.5;
 	else if (keycode == SDLK_DOWN)
@@ -64,18 +73,16 @@ int		sdl_keyhook(SDL_Keycode keycode, t_rt *rt)
 int		sdl_loop(t_sdl *sdl, t_rt *rt)
 {
 	int	ret;
-	int	quit;
 
 	ret = 0;
-	quit = 0;
-	while (quit == 0)
+	while (true)
 	{
 		if (SDL_PollEvent(&(sdl->event)))
 		{
 			if (sdl->event.type == SDL_QUIT
 				|| (sdl->event.key.type == SDL_KEYUP
 					&& sdl->event.key.keysym.sym == SDLK_ESCAPE))
-				quit = 1;
+				break;
 			else if (sdl->event.type == SDL_MOUSEMOTION)
 				ret = sdl_mousehook(sdl, rt);
 			else if (sdl->event.type == SDL_KEYDOWN)

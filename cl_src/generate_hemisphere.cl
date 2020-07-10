@@ -5,7 +5,7 @@ kernel void genHemisphere(global float3 *pointArray, uint circleNumber, uint cir
 	if (id == circleNumber * circlePartNumber) {
 		pointArray[id] = GetPointOnHemisphere(0, 0);
 	} else {
-		float delta_k = 0.98f / circleNumber;
+		float delta_k = 0.96f / circleNumber;
 		float delta_alpha = (2 * M_PI) / circlePartNumber;
 		int j = id % circlePartNumber;
 		int i = (id - j) / circlePartNumber;

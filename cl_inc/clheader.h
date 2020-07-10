@@ -4,7 +4,9 @@
 #include "quaternion.h"
 #include "affine_transform.h"
 
-#define DPH 2
+#define DPH 4
+#define COLOR_NUMBER 2 * ((1 << DPH) - 1) + 1
+#define ITEM_NUMBER 2 * ((1 << DPH - 1) - 1) + 1
 
 #define NULL (void*)(0)
 
@@ -27,8 +29,6 @@ struct RT_Data {
 	/* Monte Carlo data */
 	global float3 *distribution;
 	int distributionSize;
-	/* Tree Data */
-	struct node *node;
 };
 
 struct item {
@@ -52,17 +52,11 @@ struct item {
 	float	x, y, z;
 };
 
-struct node {
+struct node
+{
+	float3	dir;
 	float3	orig;
-	float3	reflectVec3f;
-	float3	refractVec3f;
-	float	fresnelRatio;
-	global struct item *item;
-};
-
-struct tree {
-	float3 color[2 * ((1 << DPH) - 1) + 1];
-	global struct item *item[1 << (DPH - 1) + 1];
+	float3	normal;
 };
 
 struct opt {
@@ -81,12 +75,22 @@ float	CylinderIntersect(global struct item *item, float3 *orig, float3 *dir);
 float	ConeIntersect(global struct item *item, float3 *orig, float3 *dir);
 float	EllipsoidIntersect(global struct item *item, float3 *orig, float3 *dir);
 float	ParaboloidIntersect(global struct item *item, float3 *orig, float3 *dir);
-float	BoxIntersect(global struct item *item, float3 *orig, float3 *dir);
 float3	CylinderNormal(global struct item *item, float3 *orig, float3 *dir, float3 *point, float t);
 float3	ConeNormal(global struct item *item, float3 *orig, float3 *dir, float3 *point, float t);
 float3	EllipsoidNormal(global struct item *item, float3 *orig, float3 *dir, float3 *point, float t);
 float3	ParaboloidNormal(global struct item *item, float3 *orig, float3 *dir, float3 *point, float t);
-float3	BoxNormal(global struct item *item, float3 *point);
+
+float	NearestItem(struct RT_Data *RT_Data, float3 *orig, float3 *dir, int *itemIndex);
+float	NearestIllu(struct RT_Data *RT_Data, float3 *orig, float3 *dir, int *itemIndex);
+float3	GetNormal(global struct item *item, float3 *orig, float3 *dir, float3 *point, float t);
+float3	DiffLighting(struct RT_Data *RT_Data, float3 *orig, float3 *dir, float t, int itemIndex, struct node *node);
+float3	CastRay(struct RT_Data *RT_Data, float3 *orig, float3 *dir, struct node *node, global struct item **obj);
+float3	CalcDirect(int id, struct opt *opt);
+bool	Shadow(struct RT_Data *RT_Data, float3 *orig, float3 *dir);
+
+void	CreateNode(struct node *node, float3 *orig, float3 *dir, float3 *normal);
+void	GenerateTree(struct RT_Data *RT_Data, struct node *root, float *f, float3 *clr, global struct item **obj);
+void	FoldTree(float *f, float3 *clr, global struct item **obj);
 
 void	swap(float *a, float *b);
 float	IsOutside(float3 direct, float3 normal);
@@ -95,6 +99,6 @@ float3	GetRefractVec(float3 direct, float3 normal, float etat);
 float	FresnelRatio(float3 direct, float3 normal, float etat);
 uint	RGBtoUint(float3 rgb);
 bool	SolveQuadratic(float a, float b, float c, float *t1, float *t2);
-float3	GetPointOnHemisphere(float k, float alpha);
+float3	GetPointOnHemisphere(float r1, float r2);
 void	GetDistributionOnHemisphere(float3 *dist, int circleNumber, int circlePartNumber);
 #endif

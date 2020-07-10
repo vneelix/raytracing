@@ -6,7 +6,7 @@
 /*   By: vneelix <vneelix@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/03 12:47:38 by vneelix           #+#    #+#             */
-/*   Updated: 2020/07/03 22:58:38 by vneelix          ###   ########.fr       */
+/*   Updated: 2020/07/10 14:06:31 by vneelix          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,21 +18,17 @@
 # include <math.h>
 # include "SDL2/SDL.h"
 # include "SDL2/SDL_keyboard.h"
-#ifdef __APPLE__
-# include <OpenCL/opencl.h>
-#else
-# include <CL/cl.h>
-#endif
+# include "openclbuilder.h"
 # include "libft.h"
 
 typedef struct	s_cl{
 	cl_platform_id		platform;
-	cl_device_id			device;
-	cl_context				context;
+	cl_device_id		device;
+	cl_context			context;
 	cl_command_queue	queue;
-	cl_program				program;
-	cl_mem						memory[4];
-	cl_kernel					rt_kernel, genhemisphere_kernel;
+	cl_program			program;
+	cl_mem				memory[4];
+	cl_kernel			rt_kernel, genhemisphere_kernel;
 }				t_cl;
 
 typedef struct	s_sdl{
@@ -95,7 +91,8 @@ typedef struct	s_rt
 }				t_rt;
 
 cl_int		opencl_launch(t_cl *cl, t_rt *rt);
-cl_int		opencl_init(t_cl *cl, char **sources, t_rt *rt);
+cl_int		opencl_init(t_cl *cl, t_rt *rt);
+cl_int		opencl_create_infrastructure(t_cl *cl, char *src_dir, char *inc_dir);
 
 size_t		ft_splits(char *s);
 size_t		ft_number(char *s);

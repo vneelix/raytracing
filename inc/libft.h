@@ -6,7 +6,7 @@
 /*   By: vneelix <vneelix@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/09/06 17:50:40 by vneelix           #+#    #+#             */
-/*   Updated: 2020/04/29 04:04:08 by vneelix          ###   ########.fr       */
+/*   Updated: 2020/07/08 18:53:06 by vneelix          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,6 +63,9 @@ ssize_t			ft_putchar_fd(char c, int fd);
 ssize_t			ft_putstr_fd(char const *s, int fd);
 ssize_t			ft_putendl_fd(const char *s, int fd);
 ssize_t			ft_putnbr_fd(int n, int fd);
+void			*ft_nptr_del(void **nptr);
 char			*ft_getfile(char *name, int fd);
 char			**ft_directory(char *name, size_t *num_files);
+int				ft_get_directory(char *directory,
+					void **dir, void **dir_file, size_t *count);
 #endif

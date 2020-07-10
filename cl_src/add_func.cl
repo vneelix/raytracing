@@ -25,29 +25,33 @@ float3	GetRefractVec(float3 direct, float3 normal, float etat)
 {
 	float cosi, eta, etai, k;
 
-	etai = 1;
+	etai = 1.f;
 	cosi = dot(normalize(direct), normalize(normal));
-	if (cosi < 0.001)
+	if (cosi < 1e-4)
 		cosi = -cosi;
 	else {
 		normal = -normal;
 		swap(&etai, &etat);
 	}
-	eta = etai/ etat;
-	k = 1 - eta * eta * (1 - cosi * cosi); 
-    return (k < 0 ? 0 : eta * direct + (eta * cosi - sqrt(k)) * normal);
+	eta = etai / etat;
+	k = 1.f - eta * eta * (1.f - cosi * cosi);
+	if (k < 0) {
+		return (float3){0, 0, 0};
+	} else {
+		return normalize(eta * direct + (eta * cosi - sqrt(k)) * normal);
+	}
 }
 
 float	FresnelRatio(float3 direct, float3 normal, float etat)
 {
 	float sint, cosi, etai;
-	etai = 1;
+	etai = 1.f;
 	cosi = dot(normalize(direct), normalize(normal));
-	if (cosi > 1e-3)
+	if (cosi > 1e-4)
 		swap(&etai, &etat);
 	sint = etai / etat * sqrt(max(0.f, 1.f - cosi * cosi));
 	if (sint >= 1.f) {
-		return 1;
+		return 1.f;
 	} else {
 		float cost, Rs, Rp;
 		cost = sqrt(max(0.f, 1.f - sint * sint));
@@ -84,9 +88,20 @@ bool	SolveQuadratic(float a, float b, float c, float *t1, float *t2) {
 	}
 }
 
+/* float3	GetPointOnHemisphere(float r1, float r2) {
+	r1 = clamp(0.f, 1.f, r1);
+	r2 = clamp(0.f, 1.f, r2);
+	float maxAngle = radians(85.f); 
+	return (float3){
+		cos(2.f * M_PI * r1) * sqrt(1.f - pow( 1.f - r2 * (1.f - cos(maxAngle)), 2.f)),
+		sin(2.f * M_PI * r1) * sqrt(1.f - pow( 1.f - r2 * (1.f - cos(maxAngle)), 2.f)),
+		1.f - r2 * (1.f - cos(maxAngle))
+	};
+} */
+
 float3	GetPointOnHemisphere(float k, float alpha) {
 	k = clamp(0.0f, 1.f, k);
-	alpha = clamp(0.0f, (float)(2 * M_PI), alpha);
+	alpha = clamp(0.0f, (float)(2.f * M_PI), alpha);
 	return (float3){
 		sqrt(k) * cos(alpha),
 		sqrt(k) * sin(alpha),
