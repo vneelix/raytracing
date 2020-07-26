@@ -1,30 +1,74 @@
 #ifndef CLHEADER_H
 #define CLHEADER_H
 
-#define DPH 2
-#define CLR (1 << DPH + 1) - 2
-#define STE (1 << DPH) / 2
+#include "quaternion.h"
+#include "affine_transform.h"
 
-struct __attribute__ ((packed)) pref{
+#define DPH 4
+#define COLOR_NUMBER 2 * ((1 << DPH) - 1) + 1
+#define ITEM_NUMBER 2 * ((1 << (DPH - 1)) - 1) + 1
+
+#ifndef NULL
+	#define NULL (void*)(0)
+#endif
+#ifndef M_PI
+	#define	M_PI (float)3.14159265358979323846264338327950288
+#endif
+
+typedef struct	camera {
+	float	x, y, z;
+	float3	reper[4];
+}				camera;
+
+enum iType {
+	POINT,
+	PLANE,
+	SPHERE,
+	CYLINDER,
+	CONE,
+	ELLIPSOID,
+	PARABOLOID,
+};
+
+struct RT_Data {
+	int illuNumber;
+	int itemNumber;
+	global struct item *illu;
+	global struct item *item;
+	/* Monte Carlo data */
+	global float3 *distribution;
+	int distributionSize;
+};
+
+struct item {
+	/*
+	** Item params
+	*/
+	enum iType	type;
 	float3	center;
+	float3	normal;
 	float3	vector;
-	float	radius;
-	float	min;
-	float	max;
-	float	k;
-};
-struct __attribute__ ((packed)) attr{
+	float3	vMin, vMax;
+	float	radius, min, max, k;
+	/*
+	** Item properties
+	*/
 	float3	color;
-	float	shine;
-	float	reflect;
-	float	refract;
+	float	reflectRatio, refractRatio, shineRatio;
+	/*
+	** Euler angles
+	*/
+	float	x, y, z;
 };
-struct __attribute__ ((packed)) item{
-	struct pref	pref;
-	struct attr	attr;
-	int			type;
+
+struct node
+{
+	float3	dir;
+	float3	orig;
+	float3	normal;
 };
-struct __attribute__ ((packed)) opt{
+
+struct opt {
 	int		w;
 	int		h;
 	int		illu_c;
@@ -34,33 +78,36 @@ struct __attribute__ ((packed)) opt{
 	float3	center;
 };
 
-/*
-**	surface func
-*/
-float	plane(__global struct item *item, float3 center, float3 direct);
-float	sphere(__global struct item *item, float3 center, float3 direct);
-float	cylinder(__global struct item *item, float3 center, float3 direct);
-float3	cylinder_normal(__global struct item *item, float3 point, float3 center, float3 direct, float t);
-float	cone(__global struct item *item, float3 center, float3 direct);
-float3	cone_normal(__global struct item *item, float3 point, float3 center, float3 direct, float t);
-float	paraboloid(__global struct item *item, float3 center, float3 direct);
-float3	paraboloid_normal(__global struct item *item, float3 point, float3 center, float3 direct, float t);
+float	PlaneIntersect(global struct item *item, float3 *orig, float3 *dir);
+float	SphereIntersect(global struct item *item, float3 *orig, float3 *dir);
+float	CylinderIntersect(global struct item *item, float3 *orig, float3 *dir);
+float	ConeIntersect(global struct item *item, float3 *orig, float3 *dir);
+float	EllipsoidIntersect(global struct item *item, float3 *orig, float3 *dir);
+float	ParaboloidIntersect(global struct item *item, float3 *orig, float3 *dir);
+float3	CylinderNormal(global struct item *item, float3 *orig, float3 *dir, float3 *point, float t);
+float3	ConeNormal(global struct item *item, float3 *orig, float3 *dir, float3 *point, float t);
+float3	EllipsoidNormal(global struct item *item, float3 *orig, float3 *dir, float3 *point, float t);
+float3	ParaboloidNormal(global struct item *item, float3 *orig, float3 *dir, float3 *point, float t);
 
-/*
-**	add func
-*/
+float	NearestItem(struct RT_Data *RT_Data, float3 *orig, float3 *dir, int *itemIndex);
+float	NearestIllu(struct RT_Data *RT_Data, float3 *orig, float3 *dir, int *itemIndex);
+float3	GetNormal(global struct item *item, float3 *orig, float3 *dir, float3 *point, float t);
+float3	DiffLighting(struct RT_Data *RT_Data, float3 *orig, float3 *dir, float t, int itemIndex, struct node *node);
+float3	CastRay(struct RT_Data *RT_Data, float3 *orig, float3 *dir, struct node *node, global struct item **obj);
+float3	CalcDirect(int id, struct opt *opt);
+bool	Shadow(struct RT_Data *RT_Data, float3 *orig, float3 *dir);
+
+void	CreateNode(struct node *node, float3 *orig, float3 *dir, float3 *normal);
+void	GenerateTree(struct RT_Data *RT_Data, struct node *root, float *f, float3 *clr, global struct item **obj);
+void	FoldTree(float *f, float3 *clr, global struct item **obj);
+
 void	swap(float *a, float *b);
-float	outside(float3 direct, float3 normal);
-float	scalar_multiple(float3 a, float3 b);
-float	get_rate(float a, float b);
-float	calc_ratio(float3 a, float3 b);
-float	angle(float3 a, float3 b);
-float3	get_reflect_vec(float3 direct, float3 normal);
-float3	get_refract_vec(float3 direct, float3 normal, float etat);
-float	fresnel(float3 direct, float3 normal, float etat);
-float3	rotation_x(float rad, float3 vec);
-float3	rotation_y(float rad, float3 vec);
-float	minimal_param(__global struct item *item,
-			int count, float3 center, float3 direct, int *item_index);
-uint	rgb_to_uint(float3 rgb);
+float	IsOutside(float3 direct, float3 normal);
+float3	GetReflectVec(float3 direct, float3 normal);
+float3	GetRefractVec(float3 direct, float3 normal, float etat);
+float	FresnelRatio(float3 direct, float3 normal, float etat);
+uint	RGBtoUint(float3 rgb);
+bool	SolveQuadratic(float a, float b, float c, float *t1, float *t2);
+float3	GetPointOnHemisphere(float r1, float r2);
+void	GetDistributionOnHemisphere(float3 *dist, int circleNumber, int circlePartNumber);
 #endif

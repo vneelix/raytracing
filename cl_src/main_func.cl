@@ -1,196 +1,259 @@
 #include "clheader.h"
 
-struct state
-{
-	float3	point;
-	float3	normal;
-	float3	direct;
-};
-
-float3	get_normal(__global struct item *item, float3 point, float3 center, float3 direct, float t)
-{
-	float3		normal;
-
-	if (item->type == 0)
-		normal = item->pref.vector;
-	else if (item->type == 1)
-		normal = normalize(point - item->pref.center);
-	else if (item->type == 2)
-		normal = cylinder_normal(item, point, center, direct, t);
-	else if (item->type == 3)
-		normal = cone_normal(item, point, center, direct, t);
-	else if (item->type == 4)
-		normal = paraboloid_normal(item, point, center, direct, t);
-	else
-		normal = (float3){0, 0, 0};
-	return (normal);
-}
-
-bool	shadow(__global struct item *item, struct opt *opt, float3 point, float3 *direct)
-{
-	float t;
-
-	for (int i = 0; i != opt->item_c; i += 1)
-	{
-		if ((item + i)->type == 0)
-			t = plane(item + i, point, *direct);
-		else if ((item + i)->type == 1)
-			t = sphere(item + i, point, *direct);
-		else if ((item + i)->type == 2)
-			t = cylinder(item + i, point, *direct);
-		else if ((item + i)->type == 3)
-			t = cone(item + i, point, *direct);
-		else if ((item + i)->type == 4)
-			t = paraboloid(item + i, point, *direct);
-		else
+float	NearestItem(struct RT_Data *RT_Data, float3 *orig, float3 *dir, int *itemIndex) {
+	float t, tmin = INFINITY;
+	for (int i = 0; i != RT_Data->itemNumber; i += 1) {
+		if (RT_Data->item[i].type == PLANE) {
+			t = PlaneIntersect(RT_Data->item + i, orig, dir);
+		} else if (RT_Data->item[i].type == SPHERE) {
+			t = SphereIntersect(RT_Data->item + i, orig, dir);
+		} else if (RT_Data->item[i].type == CYLINDER) {
+			t = CylinderIntersect(RT_Data->item + i, orig, dir);
+		} else if (RT_Data->item[i].type == CONE) {
+			t = ConeIntersect(RT_Data->item + i, orig, dir);
+		} else if (RT_Data->item[i].type == ELLIPSOID) {
+			t = EllipsoidIntersect(RT_Data->item + i, orig, dir);
+		} else if (RT_Data->item[i].type == PARABOLOID) {
+			//t = ParaboloidIntersect(RT_Data->item + i, orig, dir);
+		} else {
 			t = INFINITY;
-		if (t > 0.f && t <= 1.f)
-			if ((item + i)->attr.refract == 0.f)
-				return (true);
-	}
-	return (false);
-}
-
-float3	calc_light(__global struct item *illu, __global struct item *item, int item_index, struct opt *opt,
-					float3 center, float3 direct, float t, struct state *state, __global struct item **ptr)
-{
-	float3		point, normal, illu_vec;
-	float		diffuse = 0.06, shine = 0, ratio = 0;
-
-	point = center + direct * t;
-	normal = get_normal(item + item_index, point, center, direct, t);
-	if (state != NULL && ptr != NULL)
-	{
-		state->point = point;
-		state->normal = normal;
-		state->direct = direct;
-		*ptr = item + item_index;
-	}
-	normal *= outside(direct, normal);
-	for (int i = 0; i != opt->illu_c; i += 1)
-	{
-		illu_vec = (illu + i)->pref.center - point;
-		if (shadow(item, opt, point + normal * 0.001f, &illu_vec))
-			continue ;
-		if ((ratio = scalar_multiple(normalize(illu_vec), normalize(normal))) > 0.001f)
-		{
-			diffuse += (ratio * (illu + i)->pref.k);
-			if ((item + item_index)->attr.shine != 0.f)
-				if ((ratio = scalar_multiple(get_reflect_vec(-illu_vec, normal), normalize(-direct))) > 0.001f)
-					shine += (pow(ratio, (item + item_index)->attr.shine) * (illu + i)->pref.k);
 		}
-	}
-	return (((item + item_index)->attr.color * diffuse) + (float3){255, 255, 255} * shine);
-}
-
-float3	traceray(__global struct item *illu, __global struct item *item, struct opt *opt,
-					float3 center, float3 direct, struct state *state, __global struct item **ptr)
-{
-	float	t;
-	int		item_index;
-
-	t = minimal_param(item, opt->item_c, center, direct, &item_index);
-	if (t != INFINITY)
-		return (calc_light(illu, item, item_index, opt, center, direct, t, state, ptr));
-	if (ptr != NULL)
-		*ptr = NULL;
-	return ((float3){0, 0, 0});
-}
-
-float3	get_point(int id, struct opt *opt)
-{
-	float3	point;
-
-	point = (float3){(id - (id / opt->w) * opt->w - (opt->w / 2)) * (
-		(float)(1) / opt->w), (id / opt->h - (opt->h / 2)) * ((float)(1) / opt->h), 1};
-	point.x += opt->center.x;
-	point.y += opt->center.y;
-	point.z += opt->center.z;
-	return (point);
-}
-
-float3	get_direct(float3 *point, struct opt *opt)
-{
-	float3	direct;
-
-	direct = normalize(*point - opt->center);
-	direct = rotation_x(opt->spin_x * M_PI / 180.f, direct);
-	direct = rotation_y(opt->spin_y * M_PI / 180.f, direct);
-	return (direct);
-}
-
-void	create_set(__global struct item *illu, __global struct item *item,
-			struct opt *opt, float3 *color, struct state *ptr, __global struct item **obj, float *arr)
-{
-	int f = 0;
-	int	num = 2;
-	int	obj_id = -1;
-	int	color_id = 0;
-	struct state state[STE * 2];
-
-	float out;
-	state[0] = *ptr;
-	for (int i = 0; i != DPH; i += 1)
-	{
-		for (int j = 0, k = 0; j != num; j += 2, k += 1)
-		{
-			if (obj[obj_id] != NULL)
-				out = outside(state[f + k].direct, state[f + k].normal);
-			if (i != (DPH - 1) && obj[obj_id] != NULL && obj[obj_id]->attr.refract != 0.f)
-				arr[color_id] = fresnel(state[f + k].direct, state[f + k].normal, obj[obj_id]->attr.refract);
-			if (obj[obj_id] != NULL && (obj[obj_id]->attr.reflect != 0.f || obj[obj_id]->attr.refract != 0.f))
-				color[color_id] = traceray(illu, item, opt, state[f + k].point + state[f + k].normal * 0.001f * out, get_reflect_vec(
-					state[f + k].direct, state[f + k].normal), (i != (DPH - 1) ? state + (f == 0 ? STE : 0) + j : NULL), (i != (DPH - 1) ? obj + color_id : NULL));
-			if (obj[obj_id] != NULL && obj[obj_id]->attr.refract != 0.f)
-				color[color_id + 1] = traceray(illu, item, opt, state[f + k].point - state[f + k].normal * 0.001f * out, get_refract_vec(state[f + k].direct, state[f 
-					+ k].normal, obj[obj_id]->attr.refract), (i != (DPH - 1) ? state + (f == 0 ? STE : 0) + j + 1 : NULL), (i != (DPH - 1) ? obj + color_id + 1 : NULL));
-			color_id += 2;
-			obj_id += 1;
-		}
-		f = (f == 0 ? STE : 0);
-		num <<= 1;
-	}
-}
-
-void	collapse_set(float3 *color, __global struct item **obj, float *k)
-{
-	if (DPH != 1)
-	{
-		int active, next;
-		for (int i = (DPH - 1); i != 0; i -= 1)
-		{
-			for (int j = 0, active = (1 << i) - 2, next = (1 << (i + 1)) - 2; active != next; j += 2, active += 1)
-			{
-				if (obj[active] != NULL && obj[active]->attr.reflect != 0.f)
-					color[active] = color[active] * (1.f - obj[active]->attr.reflect) + color[next + j] * obj[active]->attr.reflect;
-				else if (obj[active] != NULL && obj[active]->attr.refract != 0.f)
-					color[active] = color[next + j] * k[active] + color[next + j + 1] * (1.f - k[active]);
+		if (t >= 0.f && tmin > t) {
+			tmin = t;
+			if (itemIndex) {
+				*itemIndex = i;
 			}
 		}
 	}
-	if (obj[-1] != NULL && obj[-1]->attr.reflect != 0.f)
-		color[-1] = color[-1] * (1.f - obj[-1]->attr.reflect) + color[0] * obj[-1]->attr.reflect;
-	else if (obj[-1] != NULL && obj[-1]->attr.refract != 0.f)
-		color[-1] = color[0] * k[-1] + color[1] * (1.f - k[-1]);
+	return (tmin);
 }
 
-__kernel void	main_func(__global uint *pixel,
-	__global struct item *illu, __global struct item *item, struct opt opt)
-{
-	int		id = get_global_id(0);
-	float3	point = get_point(id, &opt);
-	float3	direct = get_direct(&point, &opt);
-
-	struct state state;
-	float3	color[CLR + 1] = {0};
-	float	k[CLR - (1 << DPH) + 1] = {0};
-	__global struct item *obj[CLR - (1 << DPH) + 1] = {NULL};
-
-	color[0] = traceray(illu, item, &opt, opt.center, direct, &state, obj);
-	if (obj[0] != NULL)
-	{
-		create_set(illu, item, &opt, color + 1, &state, obj + 1, k);
-		collapse_set(color + 1, obj + 1, k + 1);
+float	NearestIllu(struct RT_Data *RT_Data, float3 *orig, float3 *dir, int *itemIndex) {
+	float t, tmin = INFINITY;
+	for (int i = 0; i != RT_Data->illuNumber; i += 1) {
+		if (RT_Data->illu[i].type == SPHERE) {
+			t = SphereIntersect(RT_Data->illu + i, orig, dir);
+		} else {
+			t = INFINITY;
+		}
+		if (t >= 0.f && tmin > t) {
+			tmin = t;
+			if (itemIndex) {
+				*itemIndex = i;
+			}
+		}
 	}
-	pixel[id] = rgb_to_uint(color[0]);
+	return (tmin);
+}
+
+bool	Shadow(struct RT_Data *RT_Data, float3 *orig, float3 *dir) {
+	float t;
+	for (int i = 0; i != RT_Data->itemNumber; i += 1) {
+		if (!RT_Data->item[i].refractRatio && RT_Data->item[i].type == PLANE) {
+			t = PlaneIntersect(RT_Data->item + i, orig, dir);
+		} else if (!RT_Data->item[i].refractRatio && RT_Data->item[i].type == SPHERE) {
+			t = SphereIntersect(RT_Data->item + i, orig, dir);
+		} else if (!RT_Data->item[i].refractRatio && RT_Data->item[i].type == CYLINDER) {
+			t = CylinderIntersect(RT_Data->item + i, orig, dir);
+		} else if (!RT_Data->item[i].refractRatio && RT_Data->item[i].type == CONE) {
+			t = ConeIntersect(RT_Data->item + i, orig, dir);
+		} else if (!RT_Data->item[i].refractRatio && RT_Data->item[i].type == ELLIPSOID) {
+			t = EllipsoidIntersect(RT_Data->item + i, orig, dir);
+		} else if (!RT_Data->item[i].refractRatio && RT_Data->item[i].type == PARABOLOID) {
+			//t = ParaboloidIntersect(RT_Data->item + i, orig, dir);
+		} else {
+			t = INFINITY;
+		}
+		if (t >= 0.f && t <= 1.f) {
+			return true;
+		}
+	}
+	return false;
+}
+
+float3	GetNormal(global struct item *item, float3 *orig, float3 *dir, float3 *point, float t) {
+	if (item->type == PLANE) {
+		return item->normal;
+	} else if (item->type == SPHERE) {
+		return normalize(*point - item->center);
+	} else if (item->type == CYLINDER) {
+		return CylinderNormal(item, orig, dir, point, t);
+	} else if (item->type == CONE) {
+		return ConeNormal(item, orig, dir, point, t);
+	} else if (item->type == ELLIPSOID) {
+		return EllipsoidNormal(item, orig, dir, point, t);
+	} else if (item->type == PARABOLOID) {
+		//return ParaboloidNormal(item, orig, dir, point, t);
+	}
+	return (float3){0, 0, 0};
+}
+
+float3	DiffLighting(struct RT_Data *RT_Data, float3 *orig,
+		float3 *dir,float t, int itemIndex, struct node *node) {
+	float	diff = 0.08, shine = 0;
+	float3	point = *orig + *dir * t;
+	float3	normal = GetNormal(RT_Data->item + itemIndex, orig, dir, &point, t);
+
+	normal *= IsOutside(*dir, normal);
+	CreateNode(node, &point, dir, &normal);
+	point = point + normal * (float3)(1e-3);
+	for (int i = 0; i != RT_Data->illuNumber; i += 1) {
+/* Point light */
+		if (RT_Data->illu[i].type == POINT)	{
+			float3	illuVec = RT_Data->illu[i].center - point;
+			if (Shadow(RT_Data, &point, &illuVec)) {
+				continue;
+			}
+			float r0 = dot(normalize(illuVec), normal);
+			if (r0 > 1e-4) {
+				diff += RT_Data->illu[i].k * r0;
+				if (RT_Data->item[itemIndex].shineRatio) {
+					float r1 = dot(GetReflectVec(-normalize(illuVec), normal), -normalize(*dir));
+					if (r1 > 1e-4) {
+						shine += RT_Data->illu[i].k * pow(r1, RT_Data->item[itemIndex].shineRatio);
+					}
+				}
+			}
+		}
+/* Spheric light */
+		if (RT_Data->illu[i].type == SPHERE) {
+			float3 basis[3] = {
+				normalize(point - RT_Data->illu[i].center),
+				{0, 0, 0},
+				{0, 0, 0}
+			};
+			BuildBasis(basis);
+			float r0 = 0, r1 = 0;
+			for (int j = 0; j != RT_Data->distributionSize; j += 1) {
+				float3 illuVec = DecompByBasis(
+					RT_Data->distribution[j].zxy * RT_Data->illu[i].radius,
+					RT_Data->illu[i].center,
+					basis
+				) - point;
+				if (Shadow(RT_Data, &point, &illuVec)) {
+					continue;
+				}
+				float a = dot(normalize(illuVec), normal);
+				if (a > 1e-4) {
+					r0 += RT_Data->illu[i].k * a;
+					if (RT_Data->item[itemIndex].shineRatio) {
+						float b = dot(GetReflectVec(-normalize(illuVec), normal), -normalize(*dir));
+						if (b > 1e-4) {
+							r1 += RT_Data->illu[i].k * pow(b, RT_Data->item[itemIndex].shineRatio);
+						}
+					}
+				}
+			}
+			diff += r0 / RT_Data->distributionSize;
+			shine += r1;
+		}
+	}
+/* Global illumination */
+		if (false)
+		{
+			float k = 0.55f;
+			float count = 0;
+			float3 basis[3] = {
+				normal,
+				(float3){0, 0, 0},
+				(float3){0, 0, 0}
+			};
+			BuildBasis(basis);
+			for (int i = 0; i != RT_Data->distributionSize; i += 1) {
+				float3 illuVec = DecompByBasis(RT_Data->distribution[i].zxy, (float3){0, 0, 0}, basis);
+				if (NearestItem(RT_Data, &point, &illuVec, NULL) != INFINITY) {
+					continue;
+				}
+				count += 1.f;
+			}
+			diff += k * (count / (float)RT_Data->distributionSize);
+		}
+	return RT_Data->item[itemIndex].color * clamp(0.f, 1.f, diff) + (float3){255, 255, 255} * clamp(0.f, 1.f, shine);
+}
+
+float3	CastRay(struct RT_Data *RT_Data, float3 *orig, float3 *dir, struct node *node, global struct item **obj) {
+	float	tIllu, tItem;
+	int		itemIndex, illuIndex;
+
+	tIllu = NearestIllu(RT_Data, orig, dir, &illuIndex);
+	tItem = NearestItem(RT_Data, orig, dir, &itemIndex);
+	if (tItem != INFINITY && (tItem < tIllu)) {
+		if (obj != NULL) {*obj = RT_Data->item + itemIndex;}
+		return DiffLighting(RT_Data, orig, dir, tItem, itemIndex, node);
+	} else if (tIllu != INFINITY && (tIllu < tItem)) {
+		if (obj != NULL) {*obj = NULL;}
+		return (float3){255, 255, 255};
+	} else {
+		if (obj != NULL) {*obj = NULL;}
+		return (float3){255, 255, 255};
+	}
+}
+
+float3	CalcDirect(int id, struct opt *opt) {
+	float3 dir = (float3){
+		(id % opt->w - opt->w * 0.5f) / opt->w,
+		((id - id % opt->w) / opt->w - opt->h * 0.5f) / opt->w,
+		1.f
+	};
+	return normalize(dir);
+}
+
+kernel void	main_func(global int *pixel, global struct item *illu,
+	global struct item *item, global float3 *cam_reper, global float3 *distribution,
+		int distributionSize, global size_t *active_item_address, struct opt opt) {
+
+	int id = get_global_id(0);
+	float3 origin = cam_reper[0], direct = CalcDirect(id, &opt);
+
+	{
+		if (true) {
+			pixel[id] = 0;
+			return;
+		}
+	}
+
+	if (*active_item_address == 0) {
+		direct = Rotation(direct, opt.spin_x, opt.spin_y, 0, 0);
+	} else {
+		global struct item *active_item = (global struct item*)(*active_item_address);
+		origin = RotationAround(active_item->center, cam_reper[0], opt.spin_x, opt.spin_y, 0, 0);
+		float3	basis[3];
+		{
+			basis[2] = normalize(active_item->center - origin);
+			if (basis[2].x == 0) {
+				basis[0] = (float3){1, 0, 0};
+			} else if (basis[2].z == 0) {
+				basis[0] = (float3){0, 0, 1};
+			} else {
+				basis[0] = normalize((float3){basis[2].x, 0, -pow(basis[2].x, 2.f) / basis[2].z});
+			}
+			basis[1] = normalize(cross(basis[0], basis[2]));
+
+			basis[1] *= dot(basis[1], (float3){0, 1, 0}) < 0.f ? -1.f : 1.f;
+			if (dot(basis[2], (float3){0, 0, 1}) > 0.f) {
+				basis[0] *= dot(basis[0], (float3){1, 0, 0}) < 0.f ? -1.f : 1.f;
+			} else {
+				basis[0] *= dot(basis[0], (float3){1, 0, 0}) < 0.f ? 1.f : -1.f;
+			}
+		}
+		direct = DecompByBasis(direct, (float3){0, 0, 0}, basis);
+	}
+
+	struct	RT_Data RT_Data = {opt.illu_c, opt.item_c, illu, item, distribution, distributionSize};
+
+	if (false)
+	{
+		struct node root;
+		float f[ITEM_NUMBER];
+		float3 clr[COLOR_NUMBER];
+		global struct item *obj[ITEM_NUMBER];
+		clr[0] = CastRay(&RT_Data, &origin, &direct, &root, obj);
+		if ((obj[0] != NULL) && (obj[0]->reflectRatio || obj[0]->refractRatio)) {
+			GenerateTree(&RT_Data, &root, f, clr, obj);
+			FoldTree(f, clr, obj);
+		}
+		pixel[id] = RGBtoUint(clr[0]);
+	} else {
+		pixel[id] = RGBtoUint(CastRay(&RT_Data, &origin, &direct, NULL, NULL));
+	}
 }

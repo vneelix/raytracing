@@ -2,146 +2,122 @@
 
 void	swap(float *a, float *b)
 {
-	float buff;
-
-	buff = *a;
+	float buff = *a;
 	*a = *b;
 	*b = buff;
 }
 
-float	outside(float3 direct, float3 normal)
-{
-	if (scalar_multiple(direct, normal) > 0.001)
-		return (-1);
-	return (1);
+float	IsOutside(float3 direct, float3 normal) {
+	if (dot(normalize(direct), normal) > 0.f) {
+		return -1;
+	}
+	return 1;
 }
 
-float	scalar_multiple(float3 a, float3 b)
+float3	GetReflectVec(float3 direct, float3 normal)
 {
-	return (a.x * b.x + a.y * b.y + a.z * b.z);
+	return normalize(
+		2 * normal * dot(-direct, normal) + direct
+	);
 }
 
-float	get_rate(float a, float b)
-{
-	if (a < 0 && b < 0)
-		return (INFINITY);
-	if ((a < b && a > 0 && b > 0) || (a > b && a > 0 && b < 0))
-		return (a);
-	return (b);
-}
-
-float	angle(float3 a, float3 b)
-{
-	return (acos(scalar_multiple(normalize(a), normalize(b))));
-}
-
-float3	get_reflect_vec(float3 direct, float3 normal)
-{
-	if (scalar_multiple(direct, normal) > 0.001)
-		normal = -normal;
-	return (normalize(2 * normal * scalar_multiple(-direct, normal) + direct));
-}
-
-float3	get_refract_vec(float3 direct, float3 normal, float etat)
+float3	GetRefractVec(float3 direct, float3 normal, float etat)
 {
 	float cosi, eta, etai, k;
 
-	etai = 1;
-	cosi = scalar_multiple(normalize(direct), normalize(normal));
-	if (cosi < 0.001)
+	etai = 1.f;
+	cosi = dot(normalize(direct), normalize(normal));
+	if (cosi < 1e-4)
 		cosi = -cosi;
-	else
-	{
+	else {
 		normal = -normal;
 		swap(&etai, &etat);
 	}
-	eta = etai/ etat;
-	k = 1 - eta * eta * (1 - cosi * cosi); 
-    return (k < 0 ? 0 : eta * direct + (eta * cosi - sqrt(k)) * normal);
-}
-
-float	fresnel(float3 direct, float3 normal, float etat)
-{
-	float sint, cosi, etai;
-
-	etai = 1;
-	cosi = scalar_multiple(normalize(direct), normalize(normal));
-	if (cosi > 0.001)
-		swap(&etai, &etat);
-	sint = etai / etat * sqrt(max(0.f, 1.f - cosi * cosi));
-	if (sint >= 1.f)
-		return (1);
-	else
-	{
-		float cost, Rs, Rp;
-
-		cost = sqrt(max(0.f, 1.f - sint * sint));
-		cosi = fabs(cosi);
-		Rs = ((etat * cosi) - (etai * cost)) / ((etat * cosi) + (etai * cost));
-		Rp = ((etai * cosi) - (etat * cost)) / ((etai * cosi) + (etat * cost));
-		return ((Rs * Rs + Rp * Rp) / 2.f);
+	eta = etai / etat;
+	k = 1.f - eta * eta * (1.f - cosi * cosi);
+	if (k < 0) {
+		return (float3){0, 0, 0};
+	} else {
+		return normalize(eta * direct + (eta * cosi - sqrt(k)) * normal);
 	}
 }
 
-float3 rotation_x(float rad, float3 vec)
+float	FresnelRatio(float3 direct, float3 normal, float etat)
 {
-  float3	ret;
-
-  ret.x = vec.x;
-  ret.y = vec.y * cos(rad) - vec.z * sin(rad);
-  ret.z = vec.y * sin(rad) + vec.z * cos(rad);
-  return (ret);
+	float sint, cosi, etai;
+	etai = 1.f;
+	cosi = dot(normalize(direct), normalize(normal));
+	if (cosi > 1e-4)
+		swap(&etai, &etat);
+	sint = etai / etat * sqrt(max(0.f, 1.f - cosi * cosi));
+	if (sint >= 1.f) {
+		return 1.f;
+	} else {
+		float cost, Rs, Rp;
+		cost = sqrt(max(0.f, 1.f - sint * sint));
+		cosi = fabs(cosi);
+		Rs = (etat * cosi - etai * cost) / (etat * cosi + etai * cost);
+		Rp = (etai * cosi - etat * cost) / (etai * cosi + etat * cost);
+		return (Rs * Rs + Rp * Rp) / 2.f;
+	}
 }
 
-float3 rotation_y(float rad, float3 vec)
-{
-  float3	ret;
-
-  ret.x = vec.x * cos(rad) + vec.z * sin(rad);
-  ret.y = vec.y;
-  ret.z = vec.x * -(sin(rad)) + vec.z * cos(rad);
-  return (ret);
-}
-
-uint	rgb_to_uint(float3 rgb)
-{
-	uint		color = 0;
-
-	rgb.x = rgb.x > 255 ? 255 : rgb.x;
-	rgb.y = rgb.y > 255 ? 255 : rgb.y;
-	rgb.z = rgb.z > 255 ? 255 : rgb.z;
+uint	RGBtoUint(float3 rgb) {
+	uint	color = 0;
+	rgb.x = clamp(0.f, 255.f, rgb.x);
+	rgb.y = clamp(0.f, 255.f, rgb.y);
+	rgb.z = clamp(0.f, 255.f, rgb.z);
 	color |= (uint)(rgb.z);
 	color |= (uint)(rgb.y) << 8;
 	color |= (uint)(rgb.x) << 16;
 	return (color);
 }
 
-float	minimal_param(__global struct item *item,
-	int count, float3 center, float3 direct, int *item_index)
-{
-	float t, min;
+bool	SolveQuadratic(float a, float b, float c, float *t1, float *t2) {
+	float d = b * b - 4 * a * c;
+	if (d < 0) {
+		return (false);
+	} else {
+		d = sqrt(d);
+		*t1 = (-b + d) / (2 * a);
+		*t2 = (-b - d) / (2 * a);
+		if (*t1 > *t2) {
+			swap(t1, t2);
+		}
+		return (true);
+	}
+}
 
-	min = INFINITY;
-	for (int i = 0; i != count; i += 1)
-	{
-		if ((item + i)->type == 0)
-			t = plane(item + i, center, direct);
-		else if ((item + i)->type == 1)
-			t = sphere(item + i, center, direct);
-		else if ((item + i)->type == 2)
-			t = cylinder(item + i, center, direct);
-		else if ((item + i)->type == 3)
-			t = cone(item + i, center, direct);
-		else if ((item + i)->type == 4)
-			t = paraboloid(item + i, center, direct);
-		else
-			t = INFINITY;
-		if (t < min)
-		{
-			min = t;
-			if (item_index != NULL)
-				*item_index = i;
+/* float3	GetPointOnHemisphere(float r1, float r2) {
+	r1 = clamp(0.f, 1.f, r1);
+	r2 = clamp(0.f, 1.f, r2);
+	float maxAngle = radians(85.f); 
+	return (float3){
+		cos(2.f * M_PI * r1) * sqrt(1.f - pow( 1.f - r2 * (1.f - cos(maxAngle)), 2.f)),
+		sin(2.f * M_PI * r1) * sqrt(1.f - pow( 1.f - r2 * (1.f - cos(maxAngle)), 2.f)),
+		1.f - r2 * (1.f - cos(maxAngle))
+	};
+} */
+
+float3	GetPointOnHemisphere(float k, float alpha) {
+	k = clamp(0.0f, 1.f, k);
+	alpha = clamp(0.0f, (float)(2.f * M_PI), alpha);
+	return (float3){
+		sqrt(k) * cos(alpha),
+		sqrt(k) * sin(alpha),
+		sqrt(1.f - k)
+	};
+}
+
+void		GetDistributionOnHemisphere(float3 *dist, int circleNumber, int circlePartNumber) {
+	float	delta_k = 1.f / circleNumber;
+	float	delta_alpha = (2 * M_PI) / circlePartNumber;
+	dist += 1;
+	for (int i = 0; i != circleNumber; i += 1) {
+		for (int j = 0; j != circlePartNumber; j += 1) {
+			dist[i + circleNumber * j] = GetPointOnHemisphere(delta_k * (i + 1), delta_alpha * (j + 1));
 		}
 	}
-	return (min);
+	dist -= 1;
+	dist[0] = GetPointOnHemisphere(0, 0);
 }

@@ -6,7 +6,7 @@
 #    By: vneelix <vneelix@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/02/26 14:32:38 by vneelix           #+#    #+#              #
-#    Updated: 2020/05/02 03:38:32 by vneelix          ###   ########.fr        #
+#    Updated: 2020/07/19 16:08:16 by vneelix          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,13 +22,13 @@ INC = $(wildcard $(IPATH)*.h)
 
 OBJ = $(SRC:$(SPATH)%.c=$(OPATH)%.o)
 
-NAME = RTv1
+NAME = RT
 
 CRFLAGS = -Wall -Wextra -Werror -O2 -I./inc -c
 
 CDFLAGS = -g -O0 -I./inc -c
 
-LFLAGS = -lm -lSDL2 -lOpenCL -L./lib -lft -o $(NAME)
+LFLAGS = -lm -Llib -lft -lSDL2 -framework OpenCL -o $(NAME)
 
 MODE = RELEASE
 
@@ -36,13 +36,13 @@ MODE = RELEASE
 
 $(OPATH)%.o: $(SPATH)%.c $(INC)
 ifeq ($(MODE), debug)
-	clang $(CDFLAGS) $< -o $@
+	gcc $(CDFLAGS) $< -o $@
 else
-	clang $(CRFLAGS) $< -o $@
+	gcc $(CRFLAGS) $< -o $@
 endif
 
 $(NAME): $(OBJ)
-	clang -Wall -Wextra -Werror $^ $(LFLAGS)
+	gcc -Wall -Wextra -Werror $^ $(LFLAGS)
 
 all: $(NAME)
 

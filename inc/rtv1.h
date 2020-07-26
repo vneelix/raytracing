@@ -6,7 +6,7 @@
 /*   By: vneelix <vneelix@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/03 12:47:38 by vneelix           #+#    #+#             */
-/*   Updated: 2020/05/19 19:08:23 by vneelix          ###   ########.fr       */
+/*   Updated: 2020/07/25 16:07:53 by vneelix          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,55 +16,65 @@
 # include <stdio.h>
 # include <errno.h>
 # include <math.h>
-# include <SDL2/SDL.h>
-# include <SDL2/SDL_keyboard.h>
-#ifdef __APPLE__
-# include <OpenCL/opencl.h>
-#else
-# include <CL/cl.h>
-#endif
+# include "SDL2/SDL.h"
+# include "SDL2/SDL_keyboard.h"
+# include "openclbuilder.h"
 # include "libft.h"
 
-typedef struct	s_opencl{
-	cl_platform_id		platform_id;
-	cl_device_id		device_id;
+typedef struct	s_cl{
+	cl_platform_id		platform;
+	cl_device_id		device;
 	cl_context			context;
-	cl_command_queue	command_queue;
+	cl_command_queue	queue;
 	cl_program			program;
-	cl_mem				memobj[3];
-	cl_kernel			kernel;
-	cl_event			event;
-}				t_opencl;
+	cl_mem				memory[4];
+	/* New mem objects */
+	cl_mem				cam_reper;
+	cl_mem				active_item;
+	cl_kernel			rt_kernel, genhemisphere_kernel,
+							move_origin_kernel, find_item_kernel;
+}				t_cl;
 
 typedef struct	s_sdl{
-	SDL_Window	*win;
-	SDL_Surface	*surf;
-	SDL_Event	event;
+	uint32_t		*ptr;
+	SDL_Window		*win;
+	SDL_Texture		*tex;
+	SDL_Renderer	*ren;
+	SDL_Event		event;
 }				t_sdl;
 
-typedef struct __attribute__ ((packed)) s_pref{
+typedef enum m_itype {
+	POINT,
+	PLANE,
+	SPHERE,
+	CYLINDER,
+	CONE,
+	ELLIPSOID,
+	PARABOLOID,
+} t_itype;
+
+typedef struct item {
+	/*
+	** Item params
+	*/
+	t_itype		type;
 	cl_float3	center;
+	cl_float3	normal;
 	cl_float3	vector;
-	cl_float	radius;
-	cl_float	min;
-	cl_float	max;
-	cl_float	k;
-}	t_pref;
-
-typedef struct	__attribute__ ((packed)) s_attr{
+	cl_float3	vMin, vMax;
+	cl_float	radius, min, max, k;
+	/*
+	** Item properties
+	*/
 	cl_float3	color;
-	cl_float	shine;
-	cl_float	reflect;
-	cl_float	refract;
-}	t_attr;
+	cl_float	reflectRatio, refractRatio, shineRatio;
+	/*
+	** Euler angles
+	*/
+	cl_float	x, y, z;
+} t_item;
 
-typedef struct __attribute__ ((packed)) s_item{
-	t_pref	pref;
-	t_attr	attr;
-	cl_int	type;
-}	t_item;
-
-typedef struct __attribute__ ((packed)) s_opt{
+typedef struct s_opt{
 	cl_int		w;
 	cl_int		h;
 	cl_int		illu_c;
@@ -76,15 +86,16 @@ typedef struct __attribute__ ((packed)) s_opt{
 
 typedef struct	s_rt
 {
-	t_opencl	cl;
+	t_cl		cl;
 	t_sdl		sdl;
 	t_opt		opt;
 	t_item		*illu;
 	t_item		*item;
 }				t_rt;
 
-cl_int		opencl_launch(t_opencl *cl, t_rt *rt);
-cl_int		opencl_init(t_opencl *cl, char **sources, t_rt *rt);
+cl_int		opencl_launch(t_cl *cl, t_rt *rt);
+cl_int		opencl_init(t_cl *cl, t_rt *rt);
+cl_int		opencl_create_infrastructure(t_cl *cl, char *src_dir, char *inc_dir);
 
 size_t		ft_splits(char *s);
 size_t		ft_number(char *s);
@@ -99,9 +110,13 @@ size_t		extract_float3(char *keyword, char *string, void *arg);
 size_t		extract_param(char *string, t_item *item, __uint32_t *flags);
 size_t		get_item(t_item *item, char *file, __uint32_t pref, __uint32_t req);
 
+/* Kernel functions */
+cl_int	find_item_kernel_init(t_cl *cl);
+cl_int	find_item_kernel_launch(t_cl *cl, cl_int x, cl_int y, t_opt *opt);
+
 # define DIFFUSE 0.06
-# define W 900
-# define H 900
+# define W 800
+# define H 800
 
 #define	CENTER	1
 #define	VECTOR	2
