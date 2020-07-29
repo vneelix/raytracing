@@ -6,7 +6,7 @@
 /*   By: vneelix <vneelix@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/24 20:17:14 by vneelix           #+#    #+#             */
-/*   Updated: 2020/07/24 12:00:01 by vneelix          ###   ########.fr       */
+/*   Updated: 2020/07/27 12:11:12 by vneelix          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,6 @@ int		main(int argc, char **argv)
 		return (-1);
 	rt->opt.w = W;
 	rt->opt.h = H;
-	rt->opt.spin_x = 0;
 	rt->opt.center = (cl_float3){{0, 0, 0}};
 	rt->sdl.ptr = malloc(rt->opt.w * rt->opt.h * 4);
 	if (opencl_create_infrastructure(&rt->cl,

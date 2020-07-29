@@ -6,7 +6,7 @@
 /*   By: vneelix <vneelix@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/03 12:47:38 by vneelix           #+#    #+#             */
-/*   Updated: 2020/07/25 16:07:53 by vneelix          ###   ########.fr       */
+/*   Updated: 2020/07/28 15:52:28 by vneelix          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,10 +29,10 @@ typedef struct	s_cl{
 	cl_program			program;
 	cl_mem				memory[4];
 	/* New mem objects */
-	cl_mem				cam_reper;
+	cl_mem				camera;
 	cl_mem				active_item;
 	cl_kernel			rt_kernel, genhemisphere_kernel,
-							move_origin_kernel, find_item_kernel;
+							move_origin_kernel, find_item_kernel, rotate_kernel;
 }				t_cl;
 
 typedef struct	s_sdl{
@@ -79,10 +79,18 @@ typedef struct s_opt{
 	cl_int		h;
 	cl_int		illu_c;
 	cl_int		item_c;
-	cl_float	spin_x;
-	cl_float	spin_y;
 	cl_float3	center;
+	/* Euler angles */
+	cl_float	x, y, z;
 }	t_opt;
+
+typedef struct	camera {
+	cl_float	x;
+	cl_float	y;
+	cl_float	z;
+	cl_float3	temp[4];
+	cl_float3	reper[4];
+}				camera;
 
 typedef struct	s_rt
 {
@@ -113,6 +121,8 @@ size_t		get_item(t_item *item, char *file, __uint32_t pref, __uint32_t req);
 /* Kernel functions */
 cl_int	find_item_kernel_init(t_cl *cl);
 cl_int	find_item_kernel_launch(t_cl *cl, cl_int x, cl_int y, t_opt *opt);
+cl_int	rotate_kernel_init(t_cl *cl);
+cl_int	rotate_kernel_launch(t_cl *cl, cl_float x, cl_float y, cl_float z, cl_uint flags);
 
 # define DIFFUSE 0.06
 # define W 800

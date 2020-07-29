@@ -36,14 +36,9 @@ void	clear_queue(void)
 
 int		sdl_mousehook(t_sdl *sdl, t_rt *rt)
 {
-	rt->opt.spin_x -= atanf(sdl->event.motion.yrel) * 0.03;
-	rt->opt.spin_y += atanf(sdl->event.motion.xrel) * 0.03;
-	/*if (fabs(rt->opt.spin_x) > M_PI) {
-		rt->opt.spin_x = (2.f * M_PI - rt->opt.spin_x) * sign(rt->opt.spin_x);
-	}
-	if (fabs(rt->opt.spin_y) > M_PI) {
-		rt->opt.spin_y = (2.f * M_PI - rt->opt.spin_y) * -sign(rt->opt.spin_y);
-	}*/
+	rt->opt.x = atanf(sdl->event.motion.yrel) * 0.016;
+	rt->opt.y = atanf(sdl->event.motion.xrel) * 0.016;
+	rotate_kernel_launch(&rt->cl, rt->opt.x, rt->opt.y, 0, 0);
 	return (1);
 }
 

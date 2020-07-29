@@ -15,9 +15,23 @@ cl_int		opencl_memobj(t_cl *cl, t_rt *rt)
 	cl->memory[2] = clCreateBuffer(cl->context, CL_MEM_READ_WRITE, size, NULL, &ret);
 	ret = clEnqueueWriteBuffer(cl->queue, cl->memory[2],
 		CL_TRUE, 0, size, rt->item, 0, NULL, NULL);
-	cl->cam_reper = clCreateBuffer(cl->context, CL_MEM_READ_WRITE, sizeof(cl_float3) * 4, NULL, &ret);
-	ret = clEnqueueWriteBuffer(cl->queue, cl->cam_reper,
-		CL_TRUE, 0, sizeof(cl_float3), &rt->opt.center, 0, NULL, NULL);
+	{
+		rt->opt.center = (cl_float3){0, 0, -10};
+		cl->camera = clCreateBuffer(cl->context, CL_MEM_READ_WRITE, sizeof(camera), NULL, &ret);
+		cl_float3 reper[4] = {
+			rt->opt.center,
+			(cl_float3){1, 0, 0},
+			(cl_float3){0, 1, 0},
+			(cl_float3){0, 0, 1}
+		};
+		camera camera = {
+			0, 0, 0,
+			{reper[0], reper[1], reper[2], reper[3]},
+			{reper[0], reper[1], reper[2], reper[3]}
+		};
+		ret = clEnqueueWriteBuffer(cl->queue, cl->camera,
+			CL_TRUE, 0, sizeof(camera), &camera, 0, NULL, NULL);
+	}
 	cl_int val = 0;
 	cl_uint	address_bits = 0;
 	ret = clGetDeviceInfo(cl->device, CL_DEVICE_ADDRESS_BITS, sizeof(cl_uint), &address_bits, NULL);
@@ -30,7 +44,7 @@ cl_int		opencl_memobj(t_cl *cl, t_rt *rt)
 	return (0);
 }
 
-cl_int		opencl_launch(t_cl *cl, t_rt *rt)
+cl_int	opencl_launch(t_cl *cl, t_rt *rt)
 {
 	cl_int	ret;
 	size_t	work_size;
@@ -50,7 +64,7 @@ cl_int	find_item_kernel_init(t_cl *cl) {
 	if (ret) {
 		return -1;
 	}
-	if (clSetKernelArg(cl->find_item_kernel, 0, sizeof(cl_mem), &cl->cam_reper) ||
+	if (clSetKernelArg(cl->find_item_kernel, 0, sizeof(cl_mem), &cl->camera) ||
 			clSetKernelArg(cl->find_item_kernel, 1, sizeof(cl_mem), &cl->memory[2]) ||
 				clSetKernelArg(cl->find_item_kernel, 2, sizeof(cl_mem), &cl->active_item)) {
 		return -1;
@@ -70,6 +84,38 @@ cl_int	find_item_kernel_launch(t_cl *cl, cl_int x, cl_int y, t_opt *opt) {
 		return -1;
 	}
 	if (clEnqueueNDRangeKernel(cl->queue, cl->find_item_kernel, 1, NULL, &worksize, NULL, 0, NULL, NULL)) {
+		return -1;
+	}
+	return 0;
+}
+
+cl_int	rotate_kernel_init(t_cl *cl) {
+	cl_int	ret;
+
+	cl->rotate_kernel = clCreateKernel(cl->program, "Rotate", &ret);
+	if (ret) {
+		return -1;
+	}
+	if (clSetKernelArg(cl->rotate_kernel, 0, sizeof(cl_mem), &cl->camera) ||
+			clSetKernelArg(cl->rotate_kernel, 1, sizeof(cl_mem), &cl->active_item)) {
+		return -1;
+	}
+	return 0;
+}
+
+cl_int	rotate_kernel_launch(t_cl *cl, cl_float x, cl_float y, cl_float z, cl_uint flags) {
+	cl_int	ret;
+	size_t	worksize;
+
+	ret = 0;
+	worksize = 1;
+	if (clSetKernelArg(cl->rotate_kernel, 2, sizeof(cl_float), &x) ||
+			clSetKernelArg(cl->rotate_kernel, 3, sizeof(cl_float), &y) ||
+				clSetKernelArg(cl->rotate_kernel, 4, sizeof(cl_float), &z) ||
+					clSetKernelArg(cl->rotate_kernel, 5, sizeof(cl_uint), &flags)) {
+		return -1;
+	}
+	if (clEnqueueNDRangeKernel(cl->queue, cl->rotate_kernel, 1, NULL, &worksize, NULL, 0, NULL, NULL)) {
 		return -1;
 	}
 	return 0;
@@ -124,7 +170,7 @@ void	func(t_cl *cl) {
 	ret = clSetKernelArg(cl->rt_kernel, 5, sizeof(cl_int), &worksize);
 
 	cl->move_origin_kernel = clCreateKernel(cl->program, "MoveOrigin", &ret);
-	ret = clSetKernelArg(cl->move_origin_kernel, 0, sizeof(cl_mem), &cl->cam_reper);
+	ret = clSetKernelArg(cl->move_origin_kernel, 0, sizeof(cl_mem), &cl->camera);
 }
 
 cl_int	opencl_create_infrastructure(t_cl *cl, char *src_dir, char *inc_dir)
@@ -164,10 +210,12 @@ cl_int	opencl_init(t_cl *cl, t_rt *rt)
 	ret = clSetKernelArg(cl->rt_kernel, 0, sizeof(cl_mem), &cl->memory[0]);
 	ret = clSetKernelArg(cl->rt_kernel, 1, sizeof(cl_mem), &cl->memory[1]);
 	ret = clSetKernelArg(cl->rt_kernel, 2, sizeof(cl_mem), &cl->memory[2]);
-	ret = clSetKernelArg(cl->rt_kernel, 3, sizeof(cl_mem), &cl->cam_reper);
+	ret = clSetKernelArg(cl->rt_kernel, 3, sizeof(cl_mem), &cl->camera);
 	ret = clSetKernelArg(cl->rt_kernel, 6, sizeof(cl_mem), &cl->active_item);
 	func(cl);
-	find_item_kernel_init(cl);
+	if (find_item_kernel_init(cl) || rotate_kernel_init(cl)) {
+		return -1;
+	}
 	opencl_launch(cl, rt);
 	return (0);
 }

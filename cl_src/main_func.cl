@@ -199,24 +199,27 @@ float3	CalcDirect(int id, struct opt *opt) {
 }
 
 kernel void	main_func(global int *pixel, global struct item *illu,
-	global struct item *item, global float3 *cam_reper, global float3 *distribution,
+	global struct item *item, global camera *cam, global float3 *distribution,
 		int distributionSize, global size_t *active_item_address, struct opt opt) {
 
 	int id = get_global_id(0);
-	float3 origin = cam_reper[0], direct = CalcDirect(id, &opt);
+	float3 origin = cam->reper[0], direct = CalcDirect(id, &opt);
 
 	{
-		if (true) {
-			pixel[id] = 0;
-			return;
-		}
+		float3	basis[3] = {
+			cam->reper[1],
+			cam->reper[2],
+			cam->reper[3]
+		};
+		direct = DecompByBasis(direct, (float3){0, 0, 0}, basis);
 	}
 
+	/*
 	if (*active_item_address == 0) {
-		direct = Rotation(direct, opt.spin_x, opt.spin_y, 0, 0);
+		direct = Rotation(direct, opt.x, opt.y, 0, 0);
 	} else {
 		global struct item *active_item = (global struct item*)(*active_item_address);
-		origin = RotationAround(active_item->center, cam_reper[0], opt.spin_x, opt.spin_y, 0, 0);
+		origin = RotationAround(active_item->center, cam_reper[0], opt.x, opt.y, 0, 0);
 		float3	basis[3];
 		{
 			basis[2] = normalize(active_item->center - origin);
@@ -237,7 +240,7 @@ kernel void	main_func(global int *pixel, global struct item *illu,
 			}
 		}
 		direct = DecompByBasis(direct, (float3){0, 0, 0}, basis);
-	}
+	}*/
 
 	struct	RT_Data RT_Data = {opt.illu_c, opt.item_c, illu, item, distribution, distributionSize};
 

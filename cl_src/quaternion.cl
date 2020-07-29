@@ -54,7 +54,7 @@ float3	RotationAround(float3 around, float3 object, float x, float y, float z, i
 
 float3	RotationAroundVector(float3 vec3fAxis, float3 object, float angle, int reverse) {
 	float4 quat = (float4){object, 0};
-	float4 rotationQuat = (float4){vec3fAxis * sin(angle / 2.f), cos(angle / 2.f)};
+	float4 rotationQuat = (float4){vec3fAxis * sin(angle * 0.5f), cos(angle * 0.5f)};
 	rotationQuat = reverse ? ReverseQuat(rotationQuat) : rotationQuat;
 	return HamiltonProduct(HamiltonProduct(rotationQuat, quat), ReverseQuat(rotationQuat)).xyz;
 }

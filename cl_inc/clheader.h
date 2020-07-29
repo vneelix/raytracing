@@ -16,7 +16,10 @@
 #endif
 
 typedef struct	camera {
-	float	x, y, z;
+	float	x;
+	float	y;
+	float	z;
+	float3	temp[4];
 	float3	reper[4];
 }				camera;
 
@@ -68,14 +71,14 @@ struct node
 	float3	normal;
 };
 
-struct opt {
+struct opt{
 	int		w;
 	int		h;
 	int		illu_c;
 	int		item_c;
-	float	spin_x;
-	float	spin_y;
 	float3	center;
+	/* Euler angles */
+	float	x, y, z;
 };
 
 float	PlaneIntersect(global struct item *item, float3 *orig, float3 *dir);
