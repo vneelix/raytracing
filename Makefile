@@ -6,7 +6,7 @@
 #    By: vneelix <vneelix@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/02/26 14:32:38 by vneelix           #+#    #+#              #
-#    Updated: 2020/07/19 16:08:16 by vneelix          ###   ########.fr        #
+#    Updated: 2020/07/31 11:43:58 by vneelix          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -28,7 +28,9 @@ CRFLAGS = -Wall -Wextra -Werror -O2 -I./inc -c
 
 CDFLAGS = -g -O0 -I./inc -c
 
-LFLAGS = -lm -Llib -lft -lSDL2 -framework OpenCL -o $(NAME)
+SDL2 = -lSDL2 -lm -liconv -Wl,-framework,CoreAudio -Wl,-framework,AudioToolbox -Wl,-framework,ForceFeedback -lobjc -Wl,-framework,CoreVideo -Wl,-framework,Cocoa -Wl,-framework,Carbon -Wl,-framework,IOKit -Wl,-weak_framework,QuartzCore -Wl,-weak_framework,Metal
+
+LFLAGS = -lm -Llib -lft $(SDL2) -framework OpenCL -o $(NAME)
 
 MODE = RELEASE
 

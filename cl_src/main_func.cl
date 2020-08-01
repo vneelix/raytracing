@@ -214,34 +214,6 @@ kernel void	main_func(global int *pixel, global struct item *illu,
 		direct = DecompByBasis(direct, (float3){0, 0, 0}, basis);
 	}
 
-	/*
-	if (*active_item_address == 0) {
-		direct = Rotation(direct, opt.x, opt.y, 0, 0);
-	} else {
-		global struct item *active_item = (global struct item*)(*active_item_address);
-		origin = RotationAround(active_item->center, cam_reper[0], opt.x, opt.y, 0, 0);
-		float3	basis[3];
-		{
-			basis[2] = normalize(active_item->center - origin);
-			if (basis[2].x == 0) {
-				basis[0] = (float3){1, 0, 0};
-			} else if (basis[2].z == 0) {
-				basis[0] = (float3){0, 0, 1};
-			} else {
-				basis[0] = normalize((float3){basis[2].x, 0, -pow(basis[2].x, 2.f) / basis[2].z});
-			}
-			basis[1] = normalize(cross(basis[0], basis[2]));
-
-			basis[1] *= dot(basis[1], (float3){0, 1, 0}) < 0.f ? -1.f : 1.f;
-			if (dot(basis[2], (float3){0, 0, 1}) > 0.f) {
-				basis[0] *= dot(basis[0], (float3){1, 0, 0}) < 0.f ? -1.f : 1.f;
-			} else {
-				basis[0] *= dot(basis[0], (float3){1, 0, 0}) < 0.f ? 1.f : -1.f;
-			}
-		}
-		direct = DecompByBasis(direct, (float3){0, 0, 0}, basis);
-	}*/
-
 	struct	RT_Data RT_Data = {opt.illu_c, opt.item_c, illu, item, distribution, distributionSize};
 
 	if (false)
