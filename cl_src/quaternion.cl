@@ -1,4 +1,4 @@
-#include "quaternion.h"
+#include "quaternion.clh"
 
 float4	HamiltonProduct(float4 q1, float4 q2) {
 	return (float4){
@@ -24,13 +24,13 @@ float4	ReverseQuat(float4 q) {
 }
 
 float4	ToQuaternion(float x, float y, float z) {
-	float cos_x = cos(x * 0.5);
-	float cos_y = cos(y * 0.5);
-	float cos_z = cos(z * 0.5);
+	float cos_x = cos(x * 0.5f);
+	float cos_y = cos(y * 0.5f);
+	float cos_z = cos(z * 0.5f);
 
-	float sin_x = sin(x * 0.5);
-	float sin_y = sin(y * 0.5);
-	float sin_z = sin(z * 0.5);
+	float sin_x = sin(x * 0.5f);
+	float sin_y = sin(y * 0.5f);
+	float sin_z = sin(z * 0.5f);
 
 	return (float4){
 		sin_x * cos_y * cos_z - cos_x * sin_y * sin_z,
@@ -50,4 +50,11 @@ float3	RotationAround(float3 around, float3 object, float x, float y, float z, i
 	float4 quat = (float4){object - around, 0};
 	float4 rotationQuat = reverse ? ReverseQuat(ToQuaternion(x, y, z)) : ToQuaternion(x, y, z);
 	return HamiltonProduct(HamiltonProduct(rotationQuat, quat), ReverseQuat(rotationQuat)).xyz + around;
+}
+
+float3	RotationAroundVector(float3 vec3fAxis, float3 object, float angle, int reverse) {
+	float4 quat = (float4){object, 0};
+	float4 rotationQuat = (float4){vec3fAxis * sin(angle * 0.5f), cos(angle * 0.5f)};
+	rotationQuat = reverse ? ReverseQuat(rotationQuat) : rotationQuat;
+	return HamiltonProduct(HamiltonProduct(rotationQuat, quat), ReverseQuat(rotationQuat)).xyz;
 }

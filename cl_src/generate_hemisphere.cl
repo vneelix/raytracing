@@ -1,6 +1,6 @@
-#include "clheader.h"
+#include "clheader.clh"
 
-kernel void genHemisphere(global float3 *pointArray, uint circleNumber, uint circlePartNumber) {
+kernel void GenHemisphere(global float3 *pointArray, uint circleNumber, uint circlePartNumber) {
 	size_t id = get_global_id(0);
 	if (id == circleNumber * circlePartNumber) {
 		pointArray[id] = GetPointOnHemisphere(0, 0);

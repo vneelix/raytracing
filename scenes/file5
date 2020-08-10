@@ -1,0 +1,23 @@
+illum{
+	center (0, -15, -40)
+	k 0.75
+}
+
+cylinder{
+	center (0, 0, 90)
+	texture_file 2k_earth_daymap.jpg
+	radius 30
+	rgb (255, 255, 200)
+	shine 0
+	reflect 0.0
+	refract 0.0
+	vector (0, 1, 0)
+	min 10.0
+	max 60.0
+	texture_scale 0.5
+}
+
+scene{
+	center (0, 32, 0)
+	vector (0, 0, 1)
+}

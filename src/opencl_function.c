@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   opencl_function.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vneelix <vneelix@student.42.fr>            +#+  +:+       +#+        */
+/*   By: mdirect <mdirect@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2020/07/09 18:56:23 by vneelix           #+#    #+#             */
-/*   Updated: 2020/07/10 13:49:16 by vneelix          ###   ########.fr       */
+/*   Created: 2020/07/31 18:05:52 by mdirect           #+#    #+#             */
+/*   Updated: 2020/07/31 18:05:54 by mdirect          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,16 +14,14 @@
 
 void		*release_t_cl_builder(t_cl_builder *cl)
 {
-	cl_int ret;
-
 	if (cl->program)
-		ret = clReleaseProgram(cl->program);
+		clReleaseProgram(cl->program);
 	if (cl->queue)
-		ret = clReleaseCommandQueue(cl->queue);
+		clReleaseCommandQueue(cl->queue);
 	if (cl->context)
-		ret = clReleaseContext(cl->context);
+		clReleaseContext(cl->context);
 	if (cl->device)
-		ret = clReleaseDevice(cl->device);
+		clReleaseDevice(cl->device);
 	return (NULL);
 }
 
@@ -107,6 +105,6 @@ cl_program	*opencl_source_to_program(t_cl_builder *cl,
 	}
 	while (ret && (i != 0))
 		clReleaseProgram(prog[--i]);
-	ft_memdel(ret ? prog : NULL);
+	ft_memdel(ret ? (void**)&prog : NULL);
 	return (!ret ? prog : NULL);
 }

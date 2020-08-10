@@ -1,4 +1,4 @@
-#include "clheader.h"
+#include "clheader.clh"
 
 void	swap(float *a, float *b)
 {
@@ -109,8 +109,8 @@ float3	GetPointOnHemisphere(float k, float alpha) {
 	};
 }
 
-void		GetDistributionOnHemisphere(float3 *dist, int circleNumber, int circlePartNumber) {
-	float delta_k = 1.f / circleNumber;
+void	GetDistributionOnHemisphere(float3 *dist, int circleNumber, int circlePartNumber) {
+	float	delta_k = 1.f / circleNumber;
 	float	delta_alpha = (2 * M_PI) / circlePartNumber;
 	dist += 1;
 	for (int i = 0; i != circleNumber; i += 1) {

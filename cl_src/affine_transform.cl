@@ -1,6 +1,6 @@
-#include "affine_transform.h"
+#include "affine_transform.clh"
 
-float		Cofactor(float3 *m, int a, int b) {
+float	Cofactor(float3 *m, int a, int b) {
 	int k = 0;
 	float arr[4];
 	for (int i = 0; i != 3; i += 1) {
@@ -32,7 +32,7 @@ float3	objToBasis(float3 obj, float3 orig, float3 *basis, int pointFlag) {
 	return newObj;
 }
 
-void		BuildBasis(float3 *basis) {
+void	BuildBasis(float3 *basis) {
 	if (basis[0].x == 0) {
 		basis[1] = (float3){1, 0, 0};
 	} else if (basis[0].y == 0) {
@@ -40,7 +40,7 @@ void		BuildBasis(float3 *basis) {
 	} else if (basis[0].z == 0) {
 		basis[1] = (float3){0, 0, 1};
 	} else {
-		basis[1] = normalize((float3){1, 1, (-basis[0].x - basis[0].y) / basis[0].z});
+		basis[1] = normalize((float3){basis[0].x, basis[0].y, (-(basis[0].x * basis[0].x) - (basis[0].y * basis[0].y)) / basis[0].z});
 	}
 	basis[2] = normalize(cross(basis[0], basis[1]));
 }

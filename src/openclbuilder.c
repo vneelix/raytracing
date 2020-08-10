@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: vneelix <vneelix@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2020/07/09 18:44:24 by vneelix           #+#    #+#             */
-/*   Updated: 2020/07/10 12:52:50 by vneelix          ###   ########.fr       */
+/*   Created: 2020/07/31 18:06:17 by mdirect           #+#    #+#             */
+/*   Updated: 2020/08/08 18:05:12 by vneelix          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,14 +14,12 @@
 
 static void		*release_t_cl_program(t_cl_program *prog)
 {
-	cl_int	ret;
-
 	if (prog->src)
 		ft_nptr_del((void**)prog->src);
 	if (prog->program)
 	{
 		while (prog->size != 0)
-			ret = clReleaseProgram(prog->program[--prog->size]);
+			clReleaseProgram(prog->program[--prog->size]);
 		free(prog->program);
 	}
 	return (NULL);
@@ -60,8 +58,6 @@ static cl_int	t_cl_program_init(t_cl_builder *cl,
 {
 	char	**file;
 
-	if (!prog || !dir)
-		return (-1);
 	if (ft_get_directory(dir, (void**)&prog->src, (void**)&file, &prog->size))
 		return (-1);
 	prog->program = opencl_source_to_program(cl,
@@ -81,9 +77,11 @@ cl_int			openclbuilder(t_cl_builder *cl, char *src_dir, char *inc_dir)
 	t_cl_program	src;
 	t_cl_program	inc;
 
+	ft_bzero(&src, sizeof(t_cl_program));
+	ft_bzero(&inc, sizeof(t_cl_program));
 	if (t_cl_program_init(cl, &src, src_dir))
 		return (-1);
-	if (t_cl_program_init(cl, &inc, inc_dir))
+	if ((inc_dir != NULL) && t_cl_program_init(cl, &inc, inc_dir))
 	{
 		release_t_cl_program(&src);
 		return (-1);
