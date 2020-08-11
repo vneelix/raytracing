@@ -6,7 +6,7 @@
 /*   By: vneelix <vneelix@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/07/25 16:18:02 by mdirect           #+#    #+#             */
-/*   Updated: 2020/08/10 12:12:20 by vneelix          ###   ########.fr       */
+/*   Updated: 2020/08/11 13:01:07 by vneelix          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,20 +24,9 @@ void	check_ret(t_rt *rt, cl_int ret)
 {
 	if (ret)
 	{
-		rt->opt.flags = 1;
 		if (opencl_launch(&(rt->cl), rt))
 			close_programm(rt, "Renderer kernel error.");
 		present_win(rt);
-	}
-	else
-	{
-		if (rt->opt.flags && !rt->flag.col && !rt->flag.help)
-		{
-			rt->opt.flags = 0;
-			if (opencl_launch(&(rt->cl), rt))
-				close_programm(rt, "Renderer kernel error.");
-			present_win(rt);
-		}
 	}
 	correct_queue();
 }

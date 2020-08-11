@@ -1,1 +1,0 @@
-gcc -g -O0 -Iinc -Ilibft/inc -fsanitize=address src/*.c -framework OpenCL -Llibft -lft -Llib -lSDL2 -lSDL2_image -lm -liconv -Wl,-framework,CoreAudio -Wl,-framework,AudioToolbox -Wl,-framework,ForceFeedback -lobjc -Wl,-framework,CoreVideo -Wl,-framework,Cocoa -Wl,-framework,Carbon -Wl,-framework,IOKit -Wl,-weak_framework,QuartzCore -Wl,-weak_framework,Metal

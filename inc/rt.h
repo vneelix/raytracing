@@ -6,7 +6,7 @@
 /*   By: vneelix <vneelix@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/03 12:47:38 by vneelix           #+#    #+#             */
-/*   Updated: 2020/08/10 16:34:15 by vneelix          ###   ########.fr       */
+/*   Updated: 2020/08/11 15:36:29 by vneelix          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -234,9 +234,8 @@ void			close_programm(t_rt *rt, char *message);
 SDL_Surface		*texture_convert(SDL_Surface *surf);
 float			vector_len(const cl_float3 vect);
 
-# define DIFFUSE 0.06
-# define W 1000
-# define H 1000
+# define W 800
+# define H 800
 # define CENTER	1
 # define VECTOR	2
 # define RADIUS	4
@@ -268,4 +267,10 @@ float			vector_len(const cl_float3 vect);
 # define CONE_PREF (CENTER | VECTOR | ATTR | REST)
 # define CYLINDER_REQ (CENTER | RADIUS | VECTOR | RGB)
 # define CYLINDER_PREF (CENTER | RADIUS | VECTOR | ATTR | (REST - K))
+
+# define AMBIENT 1
+# define ALIASING 2
+# define RECURSION 4
+# define SOFT_SHADOWS 8
+# define FAST_RENDER 16
 #endif

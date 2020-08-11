@@ -8,6 +8,12 @@
 #define COLOR_NUMBER 2 * ((1 << DPH) - 1) + 1
 #define ITEM_NUMBER 2 * ((1 << (DPH - 1)) - 1) + 1
 
+#define	AMBIENT 1
+#define ALIASING 2
+#define RECURSION 4
+#define SOFT_SHADOWS 8
+#define FAST_RENDER 16
+
 #ifndef NULL
 	#define NULL (void*)(0)
 #endif
@@ -108,6 +114,7 @@ float	NearestIllu(struct RT_Data *RT_Data, float3 *orig, float3 *dir, int *itemI
 float3	GetNormal(global struct item *item, float3 *orig, float3 *dir, float3 *point, float t);
 float3	DiffLighting(struct RT_Data *RT_Data, float3 *orig, float3 *dir, float t, int itemIndex, struct node *node);
 float3	CastRay(struct RT_Data *RT_Data, float3 *orig, float3 *dir, struct node *node, global struct item **obj);
+float3	Cast(struct RT_Data *RT_Data, float3 *orig, float3 *dir, struct node *node, global struct item **obj);
 float3	CalcDirect(int id, struct opt *opt);
 bool	Shadow(struct RT_Data *RT_Data, float3 *orig, float3 *dir);
 

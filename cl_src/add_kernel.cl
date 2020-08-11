@@ -63,7 +63,8 @@ kernel void	FindItem(global camera *cam, global struct item *item,
 			} else if (cam->temp[3].z == 0) {
 				cam->temp[1] = (float3){0, 0, 1};
 			} else {
-				cam->temp[1] = normalize((float3){cam->temp[3].x, 0, -pow(cam->temp[3].x, 2.f) / cam->temp[3].z});
+				cam->temp[1] = normalize((float3){cam->temp[3].x,
+					0, -pow(cam->temp[3].x, 2.f) / cam->temp[3].z});
 			}
 			cam->temp[2] = normalize(cross(cam->temp[1], cam->temp[3]));
 			cam->temp[2] *= dot(cam->temp[2], (float3){0, 1, 0}) < 0.f ? -1.f : 1.f;
@@ -104,7 +105,8 @@ kernel void	Rotate(global camera *cam, global size_t
 		} else if (cam->reper[3].z == 0) {
 			cam->reper[1] = (float3){0, 0, 1};
 		} else {
-			cam->reper[1] = normalize((float3){cam->reper[3].x, 0, -pow(cam->reper[3].x, 2.f) / cam->reper[3].z});
+			cam->reper[1] = normalize((float3){cam->reper[3].x,
+				0, -pow(cam->reper[3].x, 2.f) / cam->reper[3].z});
 		}
 		cam->reper[2] = normalize(cross(cam->reper[1], cam->reper[3]));
 		cam->reper[2] *= dot(cam->reper[2], (float3){0, 1, 0}) < 0.f ? -1.f : 1.f;
@@ -129,7 +131,8 @@ kernel void	Rotate(global camera *cam, global size_t
 		} else if (cam->reper[3].z == 0) {
 			cam->reper[1] = (float3){0, 0, 1};
 		} else {
-			cam->reper[1] = normalize((float3){cam->reper[3].x, 0, -pow(cam->reper[3].x, 2.f) / cam->reper[3].z});
+			cam->reper[1] = normalize((float3){cam->reper[3].x,
+				0, -pow(cam->reper[3].x, 2.f) / cam->reper[3].z});
 		}
 		cam->reper[2] = normalize(cross(cam->reper[1], cam->reper[3]));
 		cam->reper[2] *= dot(cam->reper[2], (float3){0, 1, 0}) < 0.f ? -1.f : 1.f;

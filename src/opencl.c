@@ -6,7 +6,7 @@
 /*   By: vneelix <vneelix@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/08/07 21:02:58 by vneelix           #+#    #+#             */
-/*   Updated: 2020/08/10 13:50:12 by vneelix          ###   ########.fr       */
+/*   Updated: 2020/08/11 15:29:29 by vneelix          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,20 +60,23 @@ cl_int		opencl_memobj(t_cl *cl, t_rt *rt)
 	if (!(cl->pixel_buffer = clCreateBuffer(cl->context,
 		CL_MEM_READ_WRITE, rt->opt.w * rt->opt.h * 4, NULL, NULL))
 		|| !(cl->item_buffer = clCreateBuffer(cl->context,
-			CL_MEM_READ_WRITE, sizeof(t_item) * rt->opt.item_c, NULL, NULL))
-			|| !(cl->illu_buffer = clCreateBuffer(cl->context,
-				CL_MEM_READ_WRITE, sizeof(t_item) * rt->opt.illu_c, NULL, NULL))
-				|| !(cl->texture_buffer = clCreateBuffer(cl->context,
-					CL_MEM_READ_ONLY,
-						rt->opt.texture_size * sizeof(uint), NULL, NULL)))
+			CL_MEM_READ_WRITE, sizeof(t_item) * rt->opt.item_c, NULL, NULL)))
 		return (-1);
-	if (clEnqueueWriteBuffer(cl->queue, cl->item_buffer, CL_TRUE, 0,
-		sizeof(t_item) * rt->opt.item_c, rt->item, 0, NULL, NULL)
-		|| clEnqueueWriteBuffer(cl->queue, cl->illu_buffer, CL_TRUE, 0,
-			sizeof(t_item) * rt->opt.illu_c, rt->illu, 0, NULL, NULL)
-			|| clEnqueueWriteBuffer(cl->queue, cl->texture_buffer, CL_TRUE,
-				0, rt->opt.texture_size
-					* sizeof(uint), rt->texture, 0, NULL, NULL))
+	if (rt->illu && !(cl->illu_buffer = clCreateBuffer(cl->context,
+		CL_MEM_READ_WRITE, sizeof(t_item) * rt->opt.illu_c, NULL, NULL)))
+		return (-1);
+	if (rt->texture && !(cl->texture_buffer = clCreateBuffer(cl->context,
+		CL_MEM_READ_ONLY, rt->opt.texture_size * sizeof(uint), NULL, NULL)))
+		return (-1);
+	if (clEnqueueWriteBuffer(cl->queue, cl->item_buffer, CL_TRUE,
+		0, sizeof(t_item) * rt->opt.item_c, rt->item, 0, NULL, NULL))
+		return (-1);
+	if (cl->illu_buffer && clEnqueueWriteBuffer(cl->queue, cl->illu_buffer,
+		CL_TRUE, 0, sizeof(t_item) * rt->opt.illu_c, rt->illu, 0, NULL, NULL))
+		return (-1);
+	if (cl->texture_buffer && clEnqueueWriteBuffer(
+		cl->queue, cl->texture_buffer, CL_TRUE, 0, rt->opt.texture_size
+								* sizeof(uint), rt->texture, 0, NULL, NULL))
 		return (-1);
 	if (active_item_address_init(cl) || !(cl->camera = clCreateBuffer(
 			cl->context, CL_MEM_READ_WRITE, sizeof(t_camera), NULL, NULL)))
@@ -126,7 +129,7 @@ cl_int		opencl_init(t_cl *cl, t_rt *rt)
 	if (move_origin_kernel_init(cl) || find_item_kernel_init(cl)
 			|| rotate_kernel_init(cl) || change_color_kernel_init(cl)
 				|| genhemisphere_kernel(cl,
-					(cl_uint2){{16, 32}}, (cl_uint2){{64, 128}}))
+					(cl_uint2){{16, 32}}, (cl_uint2){{32, 32}}))
 		return (-1);
 	if (camera_init(cl, rt))
 		return (-1);

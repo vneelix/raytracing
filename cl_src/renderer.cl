@@ -94,7 +94,9 @@ float3	DiffLighting(struct RT_Data *RT_Data, float3 *orig,
 
 	for (int i = 0; i != RT_Data->illuNumber; i += 1) {
 /* Point light */
-		if (RT_Data->illu[i].type == POINT || RT_Data->flags) {
+		if (RT_Data->illu[i].type == POINT
+			|| (RT_Data->illu[i].type == SPHERE
+				&& ((RT_Data->flags & FAST_RENDER) || !(RT_Data->flags & SOFT_SHADOWS)))) {
 			float3	illuVec = RT_Data->illu[i].center - point;
 			if (Shadow(RT_Data, &point, &illuVec)) {
 				continue;
@@ -111,7 +113,8 @@ float3	DiffLighting(struct RT_Data *RT_Data, float3 *orig,
 			}
 		}
 /* Spheric light */
-		if (!RT_Data->flags && RT_Data->illu[i].type == SPHERE) {
+		if (RT_Data->illu[i].type == SPHERE
+			&& !(RT_Data->flags & FAST_RENDER) && (RT_Data->flags & SOFT_SHADOWS)) {
 			float3 basis[3] = {
 				normalize(point - RT_Data->illu[i].center),
 				(float3){0, 0, 0},
@@ -120,7 +123,6 @@ float3	DiffLighting(struct RT_Data *RT_Data, float3 *orig,
 			BuildBasis(basis);
 			float r0 = 0, r1 = 0;
 			float k = dot(GetReflectVec(basis[0], normal), -normalize(*dir));
-			k = RT_Data->illu[i].k * pow(k, RT_Data->item[itemIndex].shineRatio);
 			for (uint j = 0; j != RT_Data->soft_shadow_buffer_size; j += 1) {
 				float3 illuVec = DecompByBasis(
 					RT_Data->soft_shadow_buffer[j].zxy * RT_Data->illu[i].radius,
@@ -134,7 +136,7 @@ float3	DiffLighting(struct RT_Data *RT_Data, float3 *orig,
 				if (a > 1e-4) {
 					r0 += RT_Data->illu[i].k * a;
 					if (RT_Data->item[itemIndex].shineRatio) {
-						if (dot(GetReflectVec(-illuVec, normal), *dir) > 1e-4)
+						if (dot(GetReflectVec(-illuVec, normal), -normalize(*dir)) > 1e-4)
 							r1 += RT_Data->illu[i].k * pow(k, RT_Data->item[itemIndex].shineRatio);
 					}
 				}
@@ -144,7 +146,7 @@ float3	DiffLighting(struct RT_Data *RT_Data, float3 *orig,
 		}
 	}
 /* Global illumination */
-	if (false) {
+	if (!(RT_Data->flags & FAST_RENDER) && (RT_Data->flags & AMBIENT)) {
 		float k = 0.75f;
 		float count = 0;
 		float3 basis[3] = {
@@ -172,9 +174,8 @@ float3	DiffLighting(struct RT_Data *RT_Data, float3 *orig,
 	}
 }
 
-/*float3 function(struct RT_Data *RT_Data, float3 *orig, float3 *dir, struct node *node, global struct item **obj);
-
-float3 function(struct RT_Data *RT_Data, float3 *orig, float3 *dir, struct node *node, global struct item **obj) {
+float3 Cast(struct RT_Data *RT_Data, float3 *orig,
+	float3 *dir, struct node *node, global struct item **obj) {
 	float	tIllu, tItem;
 	int		itemIndex, illuIndex;
 
@@ -188,46 +189,35 @@ float3 function(struct RT_Data *RT_Data, float3 *orig, float3 *dir, struct node 
 		return (float3){255, 255, 255};
 	} else {
 		if (obj != NULL) {*obj = NULL;}
-		return (float3){0, 0, 0};
+		return (float3){255, 255, 255};
 	}
 }
 
-float3	CastRay(struct RT_Data *RT_Data, float3 *orig, float3 *dir, struct node *node, global struct item **obj) {
-	float3	axis;
-	float3	ray[3];
-	ray[0] = *dir;
-	if (ray[0].x == 0) {
-		axis = (float3){1, 0, 0};
-	} else if (ray[0].z == 0) {
-		axis = (float3){0, 0, 1};
-	} else {
-		axis = normalize((float3){ray[0].x, 0, -pow(ray[0].x, 2.f) / ray[0].z});
-	}
-	ray[1] = RotationAroundVector(axis, ray[0], 0.00043f, 0);
-	ray[2] = RotationAroundVector(axis, ray[0], -0.00043f, 0);
-	float3 color = (float3){0, 0, 0};
-	color += function(RT_Data, orig, &ray[0], node, obj);
-	for (int i = 1; i != 3; i += 1) {
-		color += function(RT_Data, orig, &ray[i], NULL, NULL);
-	}
-	return color / 3.f;
-}*/
+float3	CastRay(struct RT_Data *RT_Data, float3 *orig,
+	float3 *dir, struct node *node, global struct item **obj) {
 
-float3	CastRay(struct RT_Data *RT_Data, float3 *orig, float3 *dir, struct node *node, global struct item **obj) {
-	float	tIllu, tItem;
-	int		itemIndex, illuIndex;
-
-	tIllu = NearestIllu(RT_Data, orig, dir, &illuIndex);
-	tItem = NearestItem(RT_Data, orig, dir, &itemIndex);
-	if (tItem != INFINITY && (tItem < tIllu)) {
-		if (obj != NULL) {*obj = RT_Data->item + itemIndex;}
-		return DiffLighting(RT_Data, orig, dir, tItem, itemIndex, node);
-	} else if (tIllu != INFINITY && (tIllu < tItem)) {
-		if (obj != NULL) {*obj = NULL;}
-		return (float3){255, 255, 255};
+	if (!(RT_Data->flags & FAST_RENDER)
+		&& (RT_Data->flags & ALIASING)) {
+		float3 axis;
+		if (dir->x == 0) {
+			axis = (float3){1, 0, 0};
+		} else if (dir->z == 0) {
+			axis = (float3){0, 0, 1};
+		} else {
+			axis = normalize((float3){dir->x, 0, -pow(dir->x, 2.f) / dir->z});
+		}
+		float3 color = (float3){0, 0, 0};
+		color += Cast(RT_Data, orig, dir, node, obj);
+		float3 ray[4] = {RotationAroundVector(axis, *dir, 0.00064f, 0)};
+		for (int i = 1; i != 4; i += 1) {
+			ray[i] = RotationAroundVector(*dir, ray[0], (M_PI / 4) * i, 0);
+		}
+		for (int i = 0; i != 4; i += 1) {
+			color += Cast(RT_Data, orig, &ray[i], NULL, NULL);
+		}
+		return color / 5.f;
 	} else {
-		if (obj != NULL) {*obj = NULL;}
-		return (float3){0, 0, 0};
+		return Cast(RT_Data, orig, dir, node, obj);
 	}
 }
 
@@ -259,7 +249,7 @@ kernel void	Renderer(global int *pixel, global struct item *illu,
 	struct	RT_Data RT_Data = {opt.illu_c, opt.item_c, illu, item, textr,
 		soft_shadow_buffer, opt.soft_shadow_buffer_size, ambient_occlusion_buffer, opt.ambient_occlusion_buffer_size, opt.flags};
 
-	if (true)
+	if (RT_Data.flags & RECURSION)
 	{
 		struct node root;
 		float f[ITEM_NUMBER];
