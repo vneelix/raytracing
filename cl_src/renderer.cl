@@ -189,7 +189,7 @@ float3 Cast(struct RT_Data *RT_Data, float3 *orig,
 		return (float3){255, 255, 255};
 	} else {
 		if (obj != NULL) {*obj = NULL;}
-		return (float3){255, 255, 255};
+		return (float3){0, 0, 0};
 	}
 }
 

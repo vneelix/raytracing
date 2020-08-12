@@ -6,13 +6,13 @@
 /*   By: vneelix <vneelix@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/08/07 21:02:58 by vneelix           #+#    #+#             */
-/*   Updated: 2020/08/11 15:29:29 by vneelix          ###   ########.fr       */
+/*   Updated: 2020/08/12 13:09:35 by vneelix          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "rt.h"
 
-cl_int		active_item_address_init(t_cl *cl)
+static cl_int	active_item_address_init(t_cl *cl)
 {
 	size_t	val;
 	cl_uint	address_bits;
@@ -31,7 +31,7 @@ cl_int		active_item_address_init(t_cl *cl)
 	return (0);
 }
 
-cl_int		camera_init(t_cl *cl, t_rt *rt)
+static cl_int	camera_init(t_cl *cl, t_rt *rt)
 {
 	t_camera	camera;
 	cl_float3	reper[4];
@@ -55,7 +55,7 @@ cl_int		camera_init(t_cl *cl, t_rt *rt)
 	return (0);
 }
 
-cl_int		opencl_memobj(t_cl *cl, t_rt *rt)
+static cl_int	opencl_memobj(t_cl *cl, t_rt *rt)
 {
 	if (!(cl->pixel_buffer = clCreateBuffer(cl->context,
 		CL_MEM_READ_WRITE, rt->opt.w * rt->opt.h * 4, NULL, NULL))
@@ -84,7 +84,7 @@ cl_int		opencl_memobj(t_cl *cl, t_rt *rt)
 	return (0);
 }
 
-cl_int		opencl_create_infrastructure(t_cl *cl, char *src_dir, char *inc_dir)
+cl_int			opencl_create_infrastructure(t_cl *cl, char *src_dir, char *inc_dir)
 {
 	cl_int			ret;
 	t_cl_builder	*cl_builder;
@@ -112,7 +112,7 @@ cl_int		opencl_create_infrastructure(t_cl *cl, char *src_dir, char *inc_dir)
 	return (ret);
 }
 
-cl_int		opencl_init(t_cl *cl, t_rt *rt)
+cl_int			opencl_init(t_cl *cl, t_rt *rt)
 {
 	if (opencl_memobj(cl, rt))
 		return (-1);
@@ -135,6 +135,7 @@ cl_int		opencl_init(t_cl *cl, t_rt *rt)
 		return (-1);
 	rt->opt.soft_shadow_buffer_size = 16 * 32 + 1;
 	rt->opt.ambient_occlusion_buffer_size = 32 * 32 + 1;
+	rt->opt.flags |= SOFT_SHADOWS;
 	if (opencl_launch(cl, rt))
 		return (-1);
 	return (0);

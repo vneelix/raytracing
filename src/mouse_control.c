@@ -6,30 +6,13 @@
 /*   By: vneelix <vneelix@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/07/31 10:20:37 by mdirect           #+#    #+#             */
-/*   Updated: 2020/08/08 17:24:23 by vneelix          ###   ########.fr       */
+/*   Updated: 2020/08/12 13:11:52 by vneelix          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "rt.h"
 
-int		sdl_mousehook(t_sdl *sdl, t_rt *rt)
-{
-	if (rt->flag.press_rm)
-	{
-		rotate_kernel_launch(
-			&rt->cl,
-			(cl_float3){{
-				atanf(sdl->event.motion.yrel) * 0.016,
-				atanf(sdl->event.motion.xrel) * 0.016,
-				0
-			}},
-			0);
-		return (1);
-	}
-	return (0);
-}
-
-int		choose_color(t_rt *rt, int x, int y)
+static int	choose_color(t_rt *rt, int x, int y)
 {
 	int			i;
 	Uint32		*p;
@@ -48,10 +31,11 @@ int		choose_color(t_rt *rt, int x, int y)
 	if (change_color_kernel_launch(&rt->cl,
 		(cl_float3){{color.r, color.g, color.b}}))
 		close_programm(rt, "Change color kernel error.");
+	rt->opt.flags |= rt->opt.flags & FAST_RENDER ? 0 : FAST_RENDER;
 	return (1);
 }
 
-int		push_mouse_down(t_sdl *sdl, t_rt *rt)
+static int	push_mouse_down(t_sdl *sdl, t_rt *rt)
 {
 	if (sdl->event.button.button == SDL_BUTTON_RIGHT)
 		rt->flag.press_rm = 1;
@@ -67,13 +51,16 @@ int		push_mouse_down(t_sdl *sdl, t_rt *rt)
 			sdl->event.motion.y, &rt->opt))
 				close_programm(rt, "Change color menu error.");
 			else
+			{
+				rt->opt.flags |= rt->opt.flags & FAST_RENDER ? 0 : FAST_RENDER;
 				return (1);
+			}
 		}
 	}
 	return (0);
 }
 
-int		push_mouse_up(t_sdl *sdl, t_rt *rt)
+static int	push_mouse_up(t_sdl *sdl, t_rt *rt)
 {
 	if (sdl->event.button.button == SDL_BUTTON_RIGHT)
 		rt->flag.press_rm = 0;
@@ -82,11 +69,29 @@ int		push_mouse_up(t_sdl *sdl, t_rt *rt)
 	return (0);
 }
 
-int		push_mouse(t_sdl *sdl, t_rt *rt)
+int			push_mouse(t_sdl *sdl, t_rt *rt)
 {
 	if (sdl->event.type == SDL_MOUSEBUTTONUP)
 		return (push_mouse_up(sdl, rt));
 	if (sdl->event.type == SDL_MOUSEBUTTONDOWN)
 		return (push_mouse_down(sdl, rt));
+	return (0);
+}
+
+int			sdl_mousehook(t_sdl *sdl, t_rt *rt)
+{
+	if (rt->flag.press_rm)
+	{
+		rotate_kernel_launch(
+			&rt->cl,
+			(cl_float3){{
+				atanf(sdl->event.motion.yrel) * 0.016,
+				atanf(sdl->event.motion.xrel) * 0.016,
+				0
+			}},
+			0);
+		rt->opt.flags |= rt->opt.flags & FAST_RENDER ? 0 : FAST_RENDER;
+		return (1);
+	}
 	return (0);
 }

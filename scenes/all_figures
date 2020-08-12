@@ -1,15 +1,14 @@
 illum{
-	k 0.8
-	center (0, 0, 0)
+	k 0.65
+	center (0, 0, 40)
     rgb (255, 255, 255)
+    radius 2
 }
 sphere{
     center (-13, 0, 50)
     rgb (0, 0, 255)
     radius 10
     shine 5000
-    reflect 0.0
-    refract 0.0
     vector (0.5, 1, 0)
 }
 cone{
@@ -17,8 +16,6 @@ cone{
     rgb (0, 255, 0)
     k 45
     shine 5000
-    reflect 0.0
-    refract 0.0
     min 0
     max 25
     vector (0, 1, 0)
@@ -28,8 +25,6 @@ cylinder {
     rgb (255, 0, 0)
     radius 5
     shine 5000
-    reflect 0.0
-    refract 0.0
     vector (0, 1, 0)
     min -20
     max 20
@@ -47,7 +42,6 @@ plane{
 	center (0, 0, 80)
 	vector (0, 0, -1)
 	rgb (255, 255, 255)
-	reflect 0.8
 	min 60
 	max 40
 }

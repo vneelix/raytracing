@@ -6,7 +6,7 @@
 /*   By: vneelix <vneelix@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/03 12:47:38 by vneelix           #+#    #+#             */
-/*   Updated: 2020/08/11 15:36:29 by vneelix          ###   ########.fr       */
+/*   Updated: 2020/08/12 13:20:00 by vneelix          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,7 +146,6 @@ typedef struct	s_uint32
 	__uint32_t			req;
 }				t_uint32;
 
-void			correct_queue(void);
 int				sdl_loop(t_sdl *sdl, t_rt *rt);
 size_t			get_sc(t_rt *rt, t_item *item, char *file);
 size_t			get_illum(t_rt *rt, t_item *item, char *file);
@@ -185,18 +184,12 @@ size_t			extract_param_part4(t_rt *rt, char *str, t_item *item,
 size_t			extract_param_part5(char *str, t_item *item,
 				uint32_t *f);
 size_t			extract_param(t_rt *rt, char *str, t_item *item, uint32_t *f);
-int				sdl_iskey(SDL_Keycode c);
 int				sdl_keyhook(SDL_Keycode keycode, t_rt *rt);
-t_rt			*init_main(char *s);
 void			change_color(t_rt *rt);
 void			present_win(t_rt *rt);
 void			help(t_rt *rt);
 int				sdl_mousehook(t_sdl *sdl, t_rt *rt);
-int				choose_color(t_rt *rt, int x, int y);
 int				push_mouse(t_sdl *sdl, t_rt *rt);
-int				push_mouse_up(t_sdl *sdl, t_rt *rt);
-int				push_mouse_down(t_sdl *sdl, t_rt *rt);
-cl_int			opencl_memobj(t_cl *cl, t_rt *rt);
 cl_int			opencl_launch(t_cl *cl, t_rt *rt);
 void			figure_init(t_rt *rt);
 cl_int			opencl_create_infrastructure(t_cl *cl, char *src_dir,
@@ -234,8 +227,8 @@ void			close_programm(t_rt *rt, char *message);
 SDL_Surface		*texture_convert(SDL_Surface *surf);
 float			vector_len(const cl_float3 vect);
 
-# define W 800
-# define H 800
+# define W 1000
+# define H 1000
 # define CENTER	1
 # define VECTOR	2
 # define RADIUS	4

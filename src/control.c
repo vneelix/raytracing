@@ -6,13 +6,13 @@
 /*   By: vneelix <vneelix@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/07/25 16:18:02 by mdirect           #+#    #+#             */
-/*   Updated: 2020/08/11 13:01:07 by vneelix          ###   ########.fr       */
+/*   Updated: 2020/08/12 13:15:38 by vneelix          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "rt.h"
 
-void	correct_queue(void)
+static void	correct_queue(void)
 {
 	SDL_EventState(SDL_KEYDOWN, SDL_DISABLE);
 	SDL_EventState(SDL_KEYDOWN, SDL_ENABLE);
@@ -20,7 +20,7 @@ void	correct_queue(void)
 	SDL_EventState(SDL_MOUSEMOTION, SDL_ENABLE);
 }
 
-void	check_ret(t_rt *rt, cl_int ret)
+static void	check_ret(t_rt *rt, cl_int ret)
 {
 	if (ret)
 	{
@@ -31,13 +31,13 @@ void	check_ret(t_rt *rt, cl_int ret)
 	correct_queue();
 }
 
-int		sdl_loop(t_sdl *sdl, t_rt *rt)
+int			sdl_loop(t_sdl *sdl, t_rt *rt)
 {
 	int	ret;
 
-	ret = 0;
 	while (SDL_WaitEvent(&(sdl->event)))
 	{
+		ret = 0;
 		if (sdl->event.type == SDL_QUIT
 			|| (sdl->event.key.type == SDL_KEYUP
 				&& sdl->event.key.keysym.sym == SDLK_ESCAPE))

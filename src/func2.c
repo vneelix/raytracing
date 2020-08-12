@@ -6,13 +6,13 @@
 /*   By: vneelix <vneelix@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/08/08 12:19:50 by dgriseld          #+#    #+#             */
-/*   Updated: 2020/08/09 18:28:02 by vneelix          ###   ########.fr       */
+/*   Updated: 2020/08/12 13:17:36 by vneelix          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "rt.h"
 
-void		free_rt_part0(t_rt *rt)
+static void	free_rt_part0(t_rt *rt)
 {
 	if (rt->intrf.image)
 		SDL_DestroyTexture(rt->intrf.image);
@@ -37,7 +37,7 @@ void		free_rt_part0(t_rt *rt)
 		SDL_DestroyWindow(rt->sdl.win);
 }
 
-void		free_rt_part1(t_rt *rt)
+static void	free_rt_part1(t_rt *rt)
 {
 	if (rt->cl.genhemisphere_kernel)
 		clReleaseKernel(rt->cl.genhemisphere_kernel);
@@ -63,7 +63,7 @@ void		free_rt_part1(t_rt *rt)
 		clReleaseMemObject(rt->cl.item_buffer);
 }
 
-void		free_rt_part2(t_rt *rt)
+static void	free_rt_part2(t_rt *rt)
 {
 	if (rt->cl.active_item)
 		clReleaseMemObject(rt->cl.active_item);

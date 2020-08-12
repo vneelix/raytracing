@@ -6,7 +6,7 @@
 /*   By: vneelix <vneelix@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/24 20:17:14 by vneelix           #+#    #+#             */
-/*   Updated: 2020/08/10 13:56:13 by vneelix          ###   ########.fr       */
+/*   Updated: 2020/08/12 13:18:06 by vneelix          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ void		close_programm(t_rt *rt, char *message)
 	exit(0);
 }
 
-t_rt		*init_main(char *s)
+static t_rt	*init_main(char *s)
 {
 	t_rt	*rt;
 

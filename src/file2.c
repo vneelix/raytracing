@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   file2.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mdirect <mdirect@student.42.fr>            +#+  +:+       +#+        */
+/*   By: vneelix <vneelix@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/08/07 18:41:16 by mdirect           #+#    #+#             */
-/*   Updated: 2020/08/07 18:42:38 by mdirect          ###   ########.fr       */
+/*   Updated: 2020/08/12 12:10:54 by vneelix          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,8 +41,8 @@ int				create_item(t_rt *rt, char *file)
 	create_item_prep(rt);
 	if (extract_item(rt, file))
 	{
-		ft_memdel((void**)rt->item);
-		ft_memdel((void**)rt->illu);
+		ft_memdel((void**)&rt->item);
+		ft_memdel((void**)&rt->illu);
 		return (-1);
 	}
 	return (0);
@@ -59,11 +59,11 @@ int				get_scene(t_rt *rt, char *file_name)
 	close(ret);
 	if (file == NULL || file[0] == '\0')
 	{
-		ft_memdel((void**)file);
+		ft_memdel((void**)&file);
 		return (-1);
 	}
 	ret = create_item(rt, file);
-	free(file);
+	ft_memdel((void**)&file);
 	if (ret)
 		return (-1);
 	return (0);
