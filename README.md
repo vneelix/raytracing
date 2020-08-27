@@ -6,6 +6,7 @@ This version uses the **GPU** available on your system **(OpenCL)**.
 
 ## Features:
 - ###Direct light
+    + #### q
 - ###Limited objects: cone, cylinder, plane, paraboloid
 - ###Bump mapping and color disruption
 - ###External files for scene description
