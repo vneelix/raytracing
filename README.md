@@ -1,3 +1,3 @@
-# raytracing
-<img src="pic/ambient.png" />
-<img src="pic/ambient.png" />
+# Raytracing C/OpenCL
+<img align="left" src="pic/ambient.png" />
+<img align="right" src="pic/ambient.png" />
