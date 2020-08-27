@@ -1,6 +1,6 @@
 # Raytracing C/OpenCL
 
-#### Flutter App Screenshots
+#### Ambient
 <table>
   <tr>
     <td>First Screen Page</td>
