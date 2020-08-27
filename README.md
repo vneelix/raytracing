@@ -15,6 +15,10 @@ This version uses the **GPU** available on your system **(OpenCL)**.
 - ### Composed elements: cubes, pyramids
 - ### Textures
 
+You can change the scene while the program is running.\
+You can use the left mouse button to focus on an object then use the right mouse button to rotate around it.\
+If focus is missing, right mouse button to rotate camera on space.
+
 <figure>
     <img src="pic/showcase.png" />
     <img src="pic/spheres2.png" />
