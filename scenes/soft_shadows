@@ -1,0 +1,96 @@
+scene{
+	center (105, -96, -6)
+	vector (-0.5, 0.6, 0.63)
+}
+illum{
+	center (44, 0, 84)
+	k 0.6
+	radius 6
+}
+plane{
+	rgb (255, 255, 255)
+	center (0, 32, 128)
+	vector (0, -1, 0)
+	min 128
+	max 128
+}
+plane{
+	rgb (255, 255, 255)
+	center (-64, 16, 128)
+	vector (1, 0, 0)
+	min 32
+	max 128
+}
+plane{
+	rgb (255, 255, 255)
+	center (0, 16, 192)
+	vector (0, 0, -1)
+	min 128
+	max 32
+}
+cylinder{
+   	center (32, 32, 128)
+	rgb (0, 0, 255)
+	radius 5
+	shine 5000
+	vector (0, -1, 0)
+	min 0
+	max 28
+}
+cylinder{
+   	center (-32, 32, 128)
+	rgb (0, 0, 255)
+	radius 5
+	shine 5000
+	vector (0, -1, 0)
+	min 0
+	max 28
+}
+cylinder{
+	center (0, 32, 160)
+	rgb (0, 0, 255)
+	radius 5
+	shine 5000
+	vector (0, -1, 0)
+	min 0
+	max 28
+}
+cylinder{
+	center (0, 32, 96)
+	rgb (0, 0, 255)
+	radius 5
+	shine 5000
+	vector (0, -1, 0)
+	min 0
+	max 28
+}
+plane{
+	rgb (255, 255, 255)
+	center (-40, 12, 168)
+	vector (0, -1, 0)
+	min 24
+	max 24
+}
+plane{
+	rgb (255, 255, 255)
+	center (-52, 24, 168)
+	vector (-1, 0, 0)
+	min 24
+	max 24
+}
+plane{
+	rgb (255, 255, 255)
+	center (-28, 24, 168)
+	vector (1, 0, 0)
+	min 24
+	max 24
+}
+cone{
+    center (0, 16, 128)
+    rgb (0, 255, 0)
+    k 45
+    shine 5000
+    min 0
+    max 16
+    vector (0, 1, 0)
+}

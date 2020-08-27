@@ -1,4 +1,4 @@
-#include "clheader.h"
+#include "clheader.clh"
 
 float	ConeRestrict(__global struct item *item, float3 *orig, float3 *dir, float3 *OC, float t0, float t1);
 

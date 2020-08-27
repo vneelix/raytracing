@@ -1,0 +1,50 @@
+illum{
+	k 0.65
+	center (0, 0, 40)
+    rgb (255, 255, 255)
+	radius 2
+}
+sphere{
+    center (-13, 0, 50)
+    rgb (0, 0, 255)
+    radius 10
+    shine 5000
+    vector (0.5, 1, 0)
+}
+cone{
+    center (4, -15, 60)
+    rgb (0, 255, 0)
+    k 45
+    shine 5000
+    min 0
+    max 25
+    vector (0, 1, 0)
+}
+cylinder { 
+    center (17, 0, 50)
+    rgb (255, 0, 0)
+    radius 5
+    shine 5000
+    vector (0, 1, 0)
+    min -20
+    max 20
+}
+paraboloid{
+    k 60
+    center (-16, 5, 30)
+    rgb (255, 255, 255)
+    vector (0, -1, 0)
+    min 4
+    max 10
+    shine 5000
+}
+plane{
+	center (0, 0, 80)
+	vector (0, 0, -1)
+	rgb (255, 255, 255)
+	min 60
+	max 40
+}
+scene{
+    center (0, 0, -16)
+}

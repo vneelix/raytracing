@@ -1,4 +1,4 @@
-#include "affine_transform.h"
+#include "affine_transform.clh"
 
 float	Cofactor(float3 *m, int a, int b) {
 	int k = 0;

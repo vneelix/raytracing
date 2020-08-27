@@ -1,4 +1,4 @@
-#include "clheader.h"
+#include "clheader.clh"
 
 kernel void GenHemisphere(global float3 *pointArray, uint circleNumber, uint circlePartNumber) {
 	size_t id = get_global_id(0);

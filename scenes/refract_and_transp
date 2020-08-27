@@ -1,0 +1,37 @@
+illum {
+	k 0.75
+	center (0, -32, 0)
+}
+plane{
+	texture_file chess_board.png
+	texture_tilling 1
+	center (0, 20, 60)
+	vector (0, -1, 0)
+	rgb (0, 0, 255)
+	min 60
+	max 40
+}
+plane{
+	texture_file chess_board.png
+	texture_tilling 1
+	center (0, 0, 80)
+	vector (0, 0, -1)
+	rgb (0, 0, 255)
+	min 60
+	max 40
+}
+sphere{
+	center (-14, 0, 62)
+	rgb (0, 0, 255)
+	radius 10
+	shine 5000
+	refract 1.25
+	vector (0, 0, 0)
+}
+sphere{
+	center (16, 6, 60)
+	radius 12
+	rgb (0, 0, 255)
+	refract 1.64
+    vector (0, 0, 0)
+}

@@ -1,18 +1,37 @@
-#include "clheader.h"
+#include "clheader.clh"
 
-kernel void	MoveOrigin(global camera *cam, uchar flags, struct opt opt) {
-	if (flags & (uchar)1) {
-		cam->reper[0] += cam->reper[3];
-	} else if (flags & (uchar)1 << 1) {
-		cam->reper[0] -= cam->reper[3];
-	} else if (flags & (uchar)1 << 2) {
-		cam->reper[0] -= cam->reper[1];
-	} else if (flags & (uchar)1 << 3) {
-		cam->reper[0] += cam->reper[1];
-	} else if (flags & (uchar)1 << 4) {
-		cam->reper[0] += (float3){0, -1, 0};
-	} else if (flags & (uchar)1 << 5) {
-		cam->reper[0] -= (float3){0, -1, 0};
+kernel void	MoveOrigin(global camera *cam, global size_t *active_item_address, uint flags)
+{
+	global struct item *active_item;
+	
+	active_item = (global struct item*)*active_item_address;
+	if (active_item != NULL) {
+		if (flags & (uint)1)
+			active_item->center += cam->reper[3];
+		else if (flags & (uint)1 << 1)
+			active_item->center -= cam->reper[3];
+		else if (flags & (uint)1 << 2)
+			active_item->center -= cam->reper[1];
+		else if (flags & (uint)1 << 3)
+			active_item->center += cam->reper[1];
+		else if (flags & (uint)1 << 4)
+			active_item->center += (float3){0, -1, 0};
+		else if (flags & (uint)1 << 5)
+			active_item->center -= (float3){0, -1, 0};
+		
+	} else {
+		if (flags & (uint)1)
+			cam->reper[0] += cam->reper[3];
+		else if (flags & (uint)1 << 1)
+			cam->reper[0] -= cam->reper[3];
+		else if (flags & (uint)1 << 2)
+			cam->reper[0] -= cam->reper[1];
+		else if (flags & (uint)1 << 3)
+			cam->reper[0] += cam->reper[1];
+		else if (flags & (uint)1 << 4)
+			cam->reper[0] += (float3){0, -1, 0};
+		else if (flags & (uint)1 << 5)
+			cam->reper[0] -= (float3){0, -1, 0};
 	}
 }
 
@@ -44,7 +63,8 @@ kernel void	FindItem(global camera *cam, global struct item *item,
 			} else if (cam->temp[3].z == 0) {
 				cam->temp[1] = (float3){0, 0, 1};
 			} else {
-				cam->temp[1] = normalize((float3){cam->temp[3].x, 0, -pow(cam->temp[3].x, 2.f) / cam->temp[3].z});
+				cam->temp[1] = normalize((float3){cam->temp[3].x,
+					0, -pow(cam->temp[3].x, 2.f) / cam->temp[3].z});
 			}
 			cam->temp[2] = normalize(cross(cam->temp[1], cam->temp[3]));
 			cam->temp[2] *= dot(cam->temp[2], (float3){0, 1, 0}) < 0.f ? -1.f : 1.f;
@@ -75,7 +95,7 @@ kernel void	FindItem(global camera *cam, global struct item *item,
 kernel void	Rotate(global camera *cam, global size_t
 	*active_item_address, float x, float y, float z, uint flags) {
 
-	if (false/**active_item_address == 0x0*/) {
+	if (*active_item_address == 0x0) {
 		cam->x += x;
 		cam->y += y;
 		cam->reper[3] = normalize(RotationAroundVector(cam->temp[1], cam->temp[3], cam->x, 0));
@@ -85,7 +105,8 @@ kernel void	Rotate(global camera *cam, global size_t
 		} else if (cam->reper[3].z == 0) {
 			cam->reper[1] = (float3){0, 0, 1};
 		} else {
-			cam->reper[1] = normalize((float3){cam->reper[3].x, 0, -pow(cam->reper[3].x, 2.f) / cam->reper[3].z});
+			cam->reper[1] = normalize((float3){cam->reper[3].x,
+				0, -pow(cam->reper[3].x, 2.f) / cam->reper[3].z});
 		}
 		cam->reper[2] = normalize(cross(cam->reper[1], cam->reper[3]));
 		cam->reper[2] *= dot(cam->reper[2], (float3){0, 1, 0}) < 0.f ? -1.f : 1.f;
@@ -97,8 +118,7 @@ kernel void	Rotate(global camera *cam, global size_t
 	}
 
 	global struct item *active_item = (global struct item*)*active_item_address;
-
-	if (false/**active_item_address != 0x0*/) {
+	if (*active_item_address != 0x0) {
 		cam->x += x;
 		cam->y += y;
 		cam->reper[0] = RotationAroundVector(cam->temp[1],
@@ -111,7 +131,8 @@ kernel void	Rotate(global camera *cam, global size_t
 		} else if (cam->reper[3].z == 0) {
 			cam->reper[1] = (float3){0, 0, 1};
 		} else {
-			cam->reper[1] = normalize((float3){cam->reper[3].x, 0, -pow(cam->reper[3].x, 2.f) / cam->reper[3].z});
+			cam->reper[1] = normalize((float3){cam->reper[3].x,
+				0, -pow(cam->reper[3].x, 2.f) / cam->reper[3].z});
 		}
 		cam->reper[2] = normalize(cross(cam->reper[1], cam->reper[3]));
 		cam->reper[2] *= dot(cam->reper[2], (float3){0, 1, 0}) < 0.f ? -1.f : 1.f;
@@ -120,5 +141,12 @@ kernel void	Rotate(global camera *cam, global size_t
 		} else {
 			cam->reper[1] *= dot(cam->reper[1], (float3){1, 0, 0}) < 0.f ? 1.f : -1.f;
 		}
+	}
+}
+
+kernel void	ChangeColor(global size_t *active_item_address, float3 color)
+{
+	if (*active_item_address != 0x0) {
+		((global struct item*)*active_item_address)->color = color;
 	}
 }

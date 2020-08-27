@@ -1,4 +1,4 @@
-#include "clheader.h"
+#include "clheader.clh"
 
 float	SphereIntersect(global struct item *item, float3 *orig, float3 *dir) {
 	float3	L = *orig - item->center;

@@ -1,4 +1,4 @@
-#include "clheader.h"
+#include "clheader.clh"
 
 float	ParaboloidRestrict(global struct item *item, float3 *orig, float3 *dir, float t0, float t1);
 
