@@ -5,6 +5,7 @@
     <img src="pic/spheres.png" />
     <img src="pic/spheres2.png" />
 </figure>
+
 #### Ambient
 <table>
   <tr>
@@ -16,6 +17,7 @@
     <td><img src="pic/ambient.png"></td>
   </tr>
  </table>
+ 
 #### Ambient
 <table>
   <tr>
