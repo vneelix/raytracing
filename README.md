@@ -10,3 +10,6 @@
     <img src="pic/ambient.png" alt="Mountains" style="width:100%">
   </div>
 </div>
+Solarized dark             |  Solarized Ocean
+:-------------------------:|:-------------------------:
+![](pic/ambient.png)  |  ![](pic/ambient.png)
