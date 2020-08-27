@@ -2,7 +2,6 @@
 
 <figure>
     <img src="pic/showcase.png" />
-    <img src="pic/spheres.png" />
     <img src="pic/spheres2.png" />
 </figure>
 
