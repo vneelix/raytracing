@@ -94,3 +94,11 @@ cone{
     max 16
     vector (0, 1, 0)
 }
+sphere{
+    center (0, 4, 128)
+	reflect 0.8
+    rgb (0, 0, 255)
+    radius 10
+    shine 5000
+    vector (0.5, 1, 0)
+}

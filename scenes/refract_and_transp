@@ -3,7 +3,7 @@ illum {
 	center (0, -32, 0)
 }
 plane{
-	texture_file chess_board.png
+	texture_file normal_mapping_kl.png
 	texture_tilling 1
 	center (0, 20, 60)
 	vector (0, -1, 0)
@@ -12,7 +12,7 @@ plane{
 	max 40
 }
 plane{
-	texture_file chess_board.png
+	texture_file normal_mapping_kl.png
 	texture_tilling 1
 	center (0, 0, 80)
 	vector (0, 0, -1)
