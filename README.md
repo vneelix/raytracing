@@ -5,16 +5,15 @@ Project based on SDL2 library, check whether the library is available on your sy
 This version uses the **GPU** available on your system **(OpenCL)**.
 
 ## Features:
-- ###Direct light
-    + #### q
-- ###Limited objects: cone, cylinder, plane, paraboloid
-- ###Bump mapping and color disruption
-- ###External files for scene description
-- ###Reflection
-- ###Transparency
-- ###Soft shadows
-- ###Composed elements: cubes, pyramids
-- ###Textures
+- ### Direct light
+- ### Limited objects: cone, cylinder, plane, paraboloid
+- ### Bump mapping and color disruption
+- ### External files for scene description
+- ### Reflection
+- ### Transparency
+- ### Soft shadows
+- ### Composed elements: cubes, pyramids
+- ### Textures
 
 <figure>
     <img src="pic/showcase.png" />
