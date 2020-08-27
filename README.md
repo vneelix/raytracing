@@ -17,7 +17,17 @@ This version uses the **GPU** available on your system **(OpenCL)**.
 
 You can change the scene while the program is running.\
 You can use the left mouse button to focus on an object then use the right mouse button to rotate around it.\
-If focus is missing, right mouse button to rotate camera on space.
+If focus is missing, right mouse button to rotate camera on space.\
+Arrows allow you to move around the scene or move objects.\
+You can change object color. Just focus them and press 'C' - open color palette.\
+
+## There are two modes full render and fast render:
+Fast render activate automatically when you you make any movement.\
+Full render activate when you press 'T'. In full mode you can configure some params:\
+- 'Q' On/Off ambient
+- 'W' On/Off antialiasing
+- 'E' On/Off recursion (reflect, refract)
+- 'R' On/Off soft shadows
 
 <figure>
     <img src="pic/showcase.png" />
