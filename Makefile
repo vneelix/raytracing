@@ -30,13 +30,13 @@ OBJ = $(SRC:$(SPATH)%.c=$(OPATH)%.o)
 
 NAME = RT
 
-CRFLAGS = -Wall -Wextra -Werror -O2 -I$(IPATH) -c
+CRFLAGS = -Wall -Wextra -O2 -I$(IPATH) -c
 
 CDFLAGS = -g -O0 -I$(IPATH) -c
 
-SDL2 = -lSDL2 -lSDL2_image -lm -liconv -Wl,-framework,CoreAudio -Wl,-framework,AudioToolbox -Wl,-framework,ForceFeedback -lobjc -Wl,-framework,CoreVideo -Wl,-framework,Cocoa -Wl,-framework,Carbon -Wl,-framework,IOKit -Wl,-weak_framework,QuartzCore -Wl,-weak_framework,Metal
+SDL2 = -lSDL2 -lSDL2_image
 
-LFLAGS = -lm -framework OpenCL -L$(LIBFTPATH) -lft -Llib $(SDL2) -o $(NAME)
+LFLAGS = -lm -lOpenCL -L$(LIBFTPATH) -lft $(SDL2) -o $(NAME)
 
 MODE = RELEASE
 
