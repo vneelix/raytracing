@@ -12,7 +12,6 @@ This version uses the **GPU** available on your system **(OpenCL)**.
 - ### Reflection
 - ### Transparency
 - ### Soft shadows
-- ### Composed elements: cubes, pyramids
 - ### Textures
 
 You can change the scene while the program is running.\
