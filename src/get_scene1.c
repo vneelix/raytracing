@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   get_scene1.c                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: vneelix <vneelix@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2020/09/12 15:20:18 by vneelix           #+#    #+#             */
+/*   Updated: 2020/09/12 15:22:50 by vneelix          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "rt.h"
 
 size_t		extract_param_part4(t_rt *rt, char *str, t_item *item, uint32_t *f)
@@ -47,6 +59,13 @@ size_t		extract_param_part5(char *str, t_item *item, uint32_t *f)
 		if (*f & TEXTURE_SCALE)
 			return (0);
 		*f |= TEXTURE_SCALE;
+	}
+	else if ((ret = extract_float("refract_index", str, (item != NULL) ?
+											&(item->refractindex) : NULL)))
+	{
+		if (*f & REFRACT_I)
+			return (0);
+		*f |= REFRACT_I;
 	}
 	return (ret);
 }

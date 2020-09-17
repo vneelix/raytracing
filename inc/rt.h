@@ -1,13 +1,29 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   rt.h                                               :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: vneelix <vneelix@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2020/09/12 15:12:04 by vneelix           #+#    #+#             */
+/*   Updated: 2020/09/12 19:17:53 by vneelix          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef RT_H
 # define RT_H
 
 # include <errno.h>
 # include <math.h>
 # include <stdlib.h>
+# ifdef __APPLE__
+#  include <OpenCL/opencl.h>
+# else
+#  include <CL/cl.h>
+# endif
 # include "SDL2/SDL.h"
 # include "SDL2/SDL_image.h"
 # include "SDL2/SDL_keyboard.h"
-# include "openclbuilder.h"
 # include "libft.h"
 
 typedef struct	s_control
@@ -45,6 +61,7 @@ typedef struct	s_cl{
 	cl_kernel			move_origin_kernel;
 	cl_kernel			change_color_kernel;
 	cl_kernel			genhemisphere_kernel;
+	cl_kernel			post_processing_kernel;
 }				t_cl;
 
 typedef struct	s_sdl{
@@ -87,6 +104,7 @@ typedef struct	s_item
 	cl_float3			color;
 	cl_float			reflectratio;
 	cl_float			refractratio;
+	cl_float			refractindex;
 	cl_float			shineratio;
 	t_textr				textr;
 }				t_item;
@@ -103,6 +121,8 @@ typedef struct	s_opt
 	cl_uint				soft_shadow_buffer_size;
 	cl_uint				ambient_occlusion_buffer_size;
 	cl_uint				flags;
+	cl_float3			background;
+	cl_float			diffuse;
 }				t_opt;
 
 typedef struct	s_camera
@@ -126,6 +146,7 @@ typedef struct	s_rt
 	char				**file_name;
 	t_interface			intrf;
 	t_item				cam;
+	uint8_t				ppf;
 }				t_rt;
 
 typedef struct	s_uint32
@@ -134,6 +155,7 @@ typedef struct	s_uint32
 	__uint32_t			req;
 }				t_uint32;
 
+float			clamp(float l, float r, float val);
 int				sdl_loop(t_sdl *sdl, t_rt *rt);
 size_t			get_sc(t_rt *rt, t_item *item, char *file);
 size_t			get_illum(t_rt *rt, t_item *item, char *file);
@@ -180,16 +202,11 @@ int				sdl_mousehook(t_sdl *sdl, t_rt *rt);
 int				push_mouse(t_sdl *sdl, t_rt *rt);
 cl_int			opencl_launch(t_cl *cl, t_rt *rt);
 void			figure_init(t_rt *rt);
-cl_int			opencl_create_infrastructure(t_cl *cl, char *src_dir,
-				char *inc_dir);
+cl_int			opencl_build(t_cl *cl);
+cl_int			opencl_create_infrastructure(t_cl *cl);
 cl_int			opencl_init(t_cl *cl, t_rt *rt);
-void			*release_t_cl_builder(t_cl_builder *cl);
-cl_int			opencl_platform_device_init(t_cl_builder *cl);
-cl_int			opencl_contex_queue_init(t_cl_builder *cl);
-void			opencl_print_log(t_cl_builder *cl,
-				cl_program *prog, const char *file);
-cl_program		*opencl_source_to_program(t_cl_builder *cl,
-				const char **src, const char **src_file, size_t src_counter);
+cl_int			opencl_platform_device_init(t_cl *cl);
+cl_int			opencl_contex_queue_init(t_cl *cl);
 cl_int			move_origin_kernel_init(t_cl *cl);
 cl_int			move_origin_kernel_launch(t_cl *cl, cl_uint flags);
 cl_int			find_item_kernel_init(t_cl *cl);
@@ -202,7 +219,6 @@ cl_int			change_color_kernel_init(t_cl *cl);
 cl_int			change_color_kernel_launch(t_cl *cl, cl_float3 color);
 cl_int			genhemisphere_kernel(t_cl *cl,
 				cl_uint2 shadow_map_size, cl_uint2 ambient_map_size);
-cl_int			openclbuilder(t_cl_builder *cl, char *src_dir, char *inc_dir);
 size_t			set_item_par(t_item *item, size_t n);
 int				get_file_name(t_rt *rt);
 int				read_texture(t_rt *rt);
@@ -215,8 +231,20 @@ void			close_programm(t_rt *rt, char *message);
 SDL_Surface		*texture_convert(SDL_Surface *surf);
 float			vector_len(const cl_float3 vect);
 
-# define W 1000
-# define H 1000
+cl_int			post_processing_kernel_init(t_cl *cl);
+cl_int			post_processing_kernel_launch(t_cl *cl, t_rt *rt);
+
+void			release_program(cl_program program);
+void			release_context(cl_context context);
+void			release_command_queue(cl_command_queue queue);
+void			release_device_id(cl_device_id device);
+void			release_sdl(t_sdl *sdl, t_interface *ife);
+void			release_kernel(cl_kernel kernel);
+void			release_memory(cl_mem memory);
+void			release_cl(t_cl *cl);
+
+# define W 1024
+# define H 768
 # define CENTER	1
 # define VECTOR	2
 # define RADIUS	4
@@ -231,13 +259,14 @@ float			vector_len(const cl_float3 vect);
 # define NORMAL_MAP_FILE 2048
 # define TEXTURE_TILLING 4096
 # define TEXTURE_SCALE 8192
+# define REFRACT_I 16384
 # define BLACK (SDL_Color){0, 0, 0}
 # define WHITE (SDL_Color){255, 255, 255}
 # define COL_MENU (SDL_Rect){15, 15, 200, 100}
-# define D_W 0.25
-# define D_H 0.35
+# define D_W 0.1
+# define D_H 0.1
 # define ATTR (ATTR1 | ATTR2)
-# define ATTR1 (RGB | SHINE | REFLECT | REFRACT | TEXTURE_FILE)
+# define ATTR1 (RGB | SHINE | REFLECT | REFRACT | REFRACT_I | TEXTURE_FILE)
 # define ATTR2 (NORMAL_MAP_FILE | TEXTURE_TILLING | TEXTURE_SCALE)
 # define REST (MIN | MAX | K)
 # define PLANE_REQ	(CENTER | VECTOR | RGB)

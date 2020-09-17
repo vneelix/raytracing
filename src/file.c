@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   file.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: vneelix <vneelix@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2020/09/12 15:12:36 by vneelix           #+#    #+#             */
+/*   Updated: 2020/09/12 15:12:37 by vneelix          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "rt.h"
 
 size_t			get_sc(t_rt *rt, t_item *item, char *file)
@@ -10,7 +22,7 @@ size_t			get_sc(t_rt *rt, t_item *item, char *file)
 	if (ft_strncmp("scene", file, len))
 		return (0);
 	if (!(ret = len + get_item(rt, item, file + len,
-									(t_uint32){CENTER | VECTOR, 0})))
+									(t_uint32){CENTER | VECTOR | RGB | K, 0})))
 		return (0);
 	if (item != NULL)
 		item->vector = normalize(item->vector);

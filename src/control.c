@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   control.c                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: vneelix <vneelix@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2020/09/12 15:12:23 by vneelix           #+#    #+#             */
+/*   Updated: 2020/09/12 15:12:24 by vneelix          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "rt.h"
 
 static void	correct_queue(void)
@@ -14,6 +26,8 @@ static void	check_ret(t_rt *rt, cl_int ret)
 	{
 		if (opencl_launch(&(rt->cl), rt))
 			close_programm(rt, "Renderer kernel error.");
+		if (rt->ppf && post_processing_kernel_launch(&rt->cl, rt))
+			close_programm(rt, "Post-process kernel error.");
 		present_win(rt);
 	}
 	correct_queue();

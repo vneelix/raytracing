@@ -1,4 +1,4 @@
-#include "clheader.clh"
+#include "./cl_inc/clheader.clh"
 
 float	NearestItem(struct RT_Data *RT_Data, float3 *orig, float3 *dir, int *itemIndex) {
 	float t, tmin = INFINITY;
@@ -84,7 +84,8 @@ float3	GetNormal(global struct item *item, float3 *orig, float3 *dir, float3 *po
 
 float3	DiffLighting(struct RT_Data *RT_Data, float3 *orig,
 		float3 *dir,float t, int itemIndex, struct node *node) {
-	float	diff = 0.08, shine = 0;
+	float	shine = 0;
+	float	diff = RT_Data->diffuse;
 	float3	point = *orig + *dir * t;
 	float3	normal = GetNormal(RT_Data->item + itemIndex, orig, dir, &point, t);
 
@@ -223,7 +224,7 @@ float3 Cast(struct RT_Data *RT_Data, float3 *orig,
 		color += (float3){255, 255, 255};
 	} else {
 		if (obj != NULL) {*obj = NULL;}
-		return color;
+		return RT_Data->background;
 	}
 	return (float3){
 		clamp(0.f, 255.f, color.x),
@@ -247,7 +248,7 @@ float3	CastRay(struct RT_Data *RT_Data, float3 *orig,
 		}
 		float3 color = (float3){0, 0, 0};
 		color += Cast(RT_Data, orig, dir, node, obj);
-		float3 ray[4] = {RotationAroundVector(axis, *dir, 0.00064f, 0)};
+		float3 ray[4] = {RotationAroundVector(axis, *dir, 0.00080f, 0)};
 		for (int i = 1; i != 4; i += 1) {
 			ray[i] = RotationAroundVector(*dir, ray[0], (M_PI / 4) * i, 0);
 		}
@@ -260,21 +261,14 @@ float3	CastRay(struct RT_Data *RT_Data, float3 *orig,
 	}
 }
 
-float3	CalcDirect(int id, struct opt *opt) {
-	float3 dir = (float3){
-		(id % opt->w - opt->w * 0.5f) / opt->w,
-		((id - id % opt->w) / opt->w - opt->h * 0.5f) / opt->w,
-		1.f
-	};
-	return normalize(dir);
-}
-
 kernel void	Renderer(global int *pixel, global struct item *illu,
 	global struct item *item, global camera *cam, global float3 *soft_shadow_buffer,
 		global float3 *ambient_occlusion_buffer, global size_t *active_item_address, global uint *textr, struct opt opt) {
 
-	int id = get_global_id(0);
-	float3 origin = cam->reper[0], direct = CalcDirect(id, &opt);
+	size_t id = get_global_id(0);
+	float2 uv = ((float2){id % opt.w, (id - id % opt.w) / opt.w}
+							- (float2){opt.w, opt.h} * 0.5f) / opt.h;
+	float3 origin = cam->reper[0], direct = normalize((float3){uv.x, uv.y, 1});
 
 	{
 		float3 basis[3] = {
@@ -286,7 +280,8 @@ kernel void	Renderer(global int *pixel, global struct item *illu,
 	}
 
 	struct	RT_Data RT_Data = {opt.illu_c, opt.item_c, illu, item, textr,
-		soft_shadow_buffer, opt.soft_shadow_buffer_size, ambient_occlusion_buffer, opt.ambient_occlusion_buffer_size, opt.flags};
+		soft_shadow_buffer, opt.soft_shadow_buffer_size, ambient_occlusion_buffer,
+			opt.ambient_occlusion_buffer_size, opt.flags, opt.background, opt.diffuse};
 
 	if (RT_Data.flags & RECURSION)
 	{

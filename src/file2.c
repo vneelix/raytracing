@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   file2.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: vneelix <vneelix@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2020/09/12 15:13:07 by vneelix           #+#    #+#             */
+/*   Updated: 2020/09/12 15:13:28 by vneelix          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "rt.h"
 
 void			create_item_prep(t_rt *rt)
@@ -12,6 +24,30 @@ void			create_item_prep(t_rt *rt)
 	}
 }
 
+void			prepare_item(t_item *item, size_t count)
+{
+	while (count--)
+	{
+		item[count].max = INFINITY;
+		item[count].min = -INFINITY;
+	}
+}
+
+void			correct_item(t_item *item, size_t count)
+{
+	while (count--)
+	{
+		item[count].k = clamp(0, INFINITY, item[count].k);
+		item[count].radius = clamp(0, INFINITY, item[count].radius);
+		item[count].shineratio = clamp(0, 5000, item[count].shineratio);
+		item[count].reflectratio = clamp(0, 1, item[count].reflectratio);
+		item[count].refractratio = clamp(0, 1, item[count].refractratio);
+		if (item[count].refractindex != 0.f)
+			item[count].refractindex = clamp(1, INFINITY,
+									item[count].refractindex);
+	}
+}
+
 int				create_item(t_rt *rt, char *file)
 {
 	if (get_count(rt, file))
@@ -20,6 +56,7 @@ int				create_item(t_rt *rt, char *file)
 		return (-1);
 	if (!(rt->item = (t_item*)ft_memalloc(sizeof(t_item) * rt->opt.item_c)))
 		return (-1);
+	prepare_item(rt->item, rt->opt.item_c);
 	if (rt->opt.illu_c
 		&& !(rt->illu = (t_item*)ft_memalloc(sizeof(t_item) * rt->opt.illu_c)))
 	{
@@ -33,6 +70,8 @@ int				create_item(t_rt *rt, char *file)
 		ft_memdel((void**)&rt->illu);
 		return (-1);
 	}
+	correct_item(rt->item, rt->opt.item_c);
+	correct_item(rt->illu, rt->opt.illu_c);
 	return (0);
 }
 

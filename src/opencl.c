@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   opencl.c                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: vneelix <vneelix@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2020/09/12 15:21:04 by vneelix           #+#    #+#             */
+/*   Updated: 2020/09/12 15:26:30 by vneelix          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "rt.h"
 
 static cl_int	active_item_address_init(t_cl *cl)
@@ -72,33 +84,16 @@ static cl_int	opencl_memobj(t_cl *cl, t_rt *rt)
 	return (0);
 }
 
-cl_int			opencl_create_infrastructure(t_cl *cl,
-												char *src_dir, char *inc_dir)
+cl_int			opencl_create_infrastructure(t_cl *cl)
 {
 	cl_int			ret;
-	t_cl_builder	*cl_builder;
 
-	if (!(cl_builder = (t_cl_builder*)ft_memalloc(sizeof(t_cl_builder))))
-		return (-1);
-	if ((ret = opencl_platform_device_init(cl_builder))
-		|| (ret = opencl_contex_queue_init(cl_builder)))
-	{
-		release_t_cl_builder(cl_builder);
-		free(cl_builder);
+	if ((ret = opencl_platform_device_init(cl))
+		|| (ret = opencl_contex_queue_init(cl)))
 		return (ret);
-	}
-	if ((ret = openclbuilder(cl_builder, src_dir, inc_dir)))
-	{
-		free(cl_builder);
+	if ((ret = opencl_build(cl)))
 		return (ret);
-	}
-	cl->queue = cl_builder->queue;
-	cl->device = cl_builder->device;
-	cl->context = cl_builder->context;
-	cl->program = cl_builder->program;
-	cl->platform = cl_builder->platform;
-	free(cl_builder);
-	return (ret);
+	return (0);
 }
 
 cl_int			opencl_init(t_cl *cl, t_rt *rt)
@@ -117,7 +112,7 @@ cl_int			opencl_init(t_cl *cl, t_rt *rt)
 		return (-1);
 	if (move_origin_kernel_init(cl) || find_item_kernel_init(cl)
 			|| rotate_kernel_init(cl) || change_color_kernel_init(cl)
-				|| genhemisphere_kernel(cl,
+				|| post_processing_kernel_init(cl) || genhemisphere_kernel(cl,
 					(cl_uint2){{16, 32}}, (cl_uint2){{32, 32}}))
 		return (-1);
 	if (camera_init(cl, rt))

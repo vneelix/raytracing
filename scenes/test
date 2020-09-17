@@ -1,0 +1,28 @@
+sphere{
+	center (12, 10, 16)
+	rgb (0, 0, 255)
+	radius 12
+	shine 5000
+	vector (0, 0, 0)
+}
+plane{
+	center (0, 20, 16)
+	vector (0, -1, 0)
+	rgb (63, 125, 255)
+	min 60
+	max 40
+}
+scene{
+	center (0, 4, -32)
+	rgb (255, 255, 255)
+	k 0.16
+}
+cone{
+	center (-16, -5, 16)
+	rgb (144, 3, 252)
+	k 45
+	shine 5000
+	min 0
+	max 25
+	vector (0, 1, 0)
+}

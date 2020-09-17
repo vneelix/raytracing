@@ -1,4 +1,4 @@
-#include "clheader.clh"
+#include "./cl_inc/clheader.clh"
 
 void	swap(float *a, float *b)
 {
@@ -87,17 +87,6 @@ bool	SolveQuadratic(float a, float b, float c, float *t1, float *t2) {
 		return (true);
 	}
 }
-
-/* float3	GetPointOnHemisphere(float r1, float r2) {
-	r1 = clamp(0.f, 1.f, r1);
-	r2 = clamp(0.f, 1.f, r2);
-	float maxAngle = radians(85.f); 
-	return (float3){
-		cos(2.f * M_PI * r1) * sqrt(1.f - pow( 1.f - r2 * (1.f - cos(maxAngle)), 2.f)),
-		sin(2.f * M_PI * r1) * sqrt(1.f - pow( 1.f - r2 * (1.f - cos(maxAngle)), 2.f)),
-		1.f - r2 * (1.f - cos(maxAngle))
-	};
-} */
 
 float3	GetPointOnHemisphere(float k, float alpha) {
 	k = clamp(0.0f, 1.f, k);

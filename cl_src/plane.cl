@@ -1,4 +1,4 @@
-#include "clheader.clh"
+#include "./cl_inc/clheader.clh"
 
 float	QuadRangle(global struct item *item, float3 *orig, float3 *dir, float t);
 
@@ -28,7 +28,7 @@ float	PlaneIntersect(global struct item *item, float3 *orig, float3 *dir) {
 		if (t < 0) {
 			return INFINITY;
 		}
-		if (item->min > 0 && item->max > 0) {
+		if (item->min > 0.f && item->max > 0.f) {
 			return QuadRangle(item, orig, dir, t);
 		} else {
 			return t;

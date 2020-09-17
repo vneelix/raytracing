@@ -1,4 +1,26 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   func.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: vneelix <vneelix@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2020/09/12 15:13:39 by vneelix           #+#    #+#             */
+/*   Updated: 2020/09/12 15:13:40 by vneelix          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "rt.h"
+
+float		clamp(float l, float r, float val)
+{
+	if (val >= l && val <= r)
+		return (val);
+	else if (val < l)
+		return (l);
+	else
+		return (r);
+}
 
 size_t		ft_splits(char *s)
 {

@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   mouse_control.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: vneelix <vneelix@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2020/09/12 15:20:42 by vneelix           #+#    #+#             */
+/*   Updated: 2020/09/12 15:20:43 by vneelix          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "rt.h"
 
 static int	choose_color(t_rt *rt, int x, int y)
@@ -73,8 +85,8 @@ int			sdl_mousehook(t_sdl *sdl, t_rt *rt)
 		rotate_kernel_launch(
 			&rt->cl,
 			(cl_float3){{
-				atanf(sdl->event.motion.yrel) * 0.016,
-				atanf(sdl->event.motion.xrel) * 0.016,
+				atanf(sdl->event.motion.yrel) * 0.024f,
+				atanf(sdl->event.motion.xrel) * 0.024f,
 				0
 			}},
 			0);

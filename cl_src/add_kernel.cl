@@ -1,4 +1,4 @@
-#include "clheader.clh"
+#include "./cl_inc/clheader.clh"
 
 kernel void	MoveOrigin(global camera *cam, global size_t *active_item_address, uint flags)
 {
@@ -6,10 +6,14 @@ kernel void	MoveOrigin(global camera *cam, global size_t *active_item_address, u
 	
 	active_item = (global struct item*)*active_item_address;
 	if (active_item != NULL) {
+		float3 vec3f =
+			active_item->center + cam->reper[3];
+		vec3f = normalize((float3){vec3f.x, 0, vec3f.z}
+					- (float3){active_item->center.x, 0, active_item->center.z});
 		if (flags & (uint)1)
-			active_item->center += cam->reper[3];
+			active_item->center += vec3f;
 		else if (flags & (uint)1 << 1)
-			active_item->center -= cam->reper[3];
+			active_item->center -= vec3f;
 		else if (flags & (uint)1 << 2)
 			active_item->center -= cam->reper[1];
 		else if (flags & (uint)1 << 3)
@@ -18,7 +22,6 @@ kernel void	MoveOrigin(global camera *cam, global size_t *active_item_address, u
 			active_item->center += (float3){0, -1, 0};
 		else if (flags & (uint)1 << 5)
 			active_item->center -= (float3){0, -1, 0};
-		
 	} else {
 		if (flags & (uint)1)
 			cam->reper[0] += cam->reper[3];
@@ -39,8 +42,8 @@ kernel void	FindItem(global camera *cam, global struct item *item,
 	global size_t *active_item_address, int x, int y, struct opt opt) {
 
 	int		itemIndex = 0;
-	float3	origin = cam->reper[0];
-	float3	direct = CalcDirect(x + opt.w * y, &opt);
+		float2 uv = ((float2){x, y} - (float2){opt.w, opt.h} * 0.5f) / opt.h;
+		float3 origin = cam->reper[0], direct = normalize((float3){uv.x, uv.y, 1});
 	struct	RT_Data RT_Data = {0, opt.item_c, NULL, item, NULL, 0};
 
 	float3 basis[3] = {
@@ -119,8 +122,19 @@ kernel void	Rotate(global camera *cam, global size_t
 
 	global struct item *active_item = (global struct item*)*active_item_address;
 	if (*active_item_address != 0x0) {
-		cam->x += x;
-		cam->y += y;
+		{
+			float angle_positive_axis = acos(
+				dot(normalize(cam->reper[3]), (float3){0, 1, 0})
+			);
+			float angle_negative_axis = acos(
+				dot(normalize(cam->reper[3]), (float3){0, -1, 0})
+			);
+			if ((x < 0.f && angle_positive_axis > (0.017453f * 5))
+				|| (x > 0.f && angle_negative_axis > (0.017453f * 5))) {
+				cam->x += x;
+			}
+			cam->y += y;
+		}
 		cam->reper[0] = RotationAroundVector(cam->temp[1],
 			cam->temp[0] - active_item->center, cam->x, 0) + active_item->center;
 		cam->reper[0] = RotationAroundVector((float3){0, 1, 0},

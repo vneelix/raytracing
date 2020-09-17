@@ -1,4 +1,4 @@
-#include "clheader.clh"
+#include "./cl_inc/clheader.clh"
 
 float3	color_plane(__global struct item *item, __global uint *texture, float3 vector_p, float3 point_p)
 {

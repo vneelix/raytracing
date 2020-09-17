@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   opencl_kernel_func2.c                              :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: vneelix <vneelix@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2020/09/12 15:20:58 by vneelix           #+#    #+#             */
+/*   Updated: 2020/09/12 15:20:59 by vneelix          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "rt.h"
 
 cl_int	opencl_launch(t_cl *cl, t_rt *rt)
@@ -6,9 +18,10 @@ cl_int	opencl_launch(t_cl *cl, t_rt *rt)
 	size_t	work_size;
 
 	work_size = rt->opt.w * rt->opt.h;
-	ret = clSetKernelArg(cl->renderer_kernel, 8, sizeof(t_opt), &(rt->opt));
-	ret = clEnqueueNDRangeKernel(cl->queue,
-		cl->renderer_kernel, 1, NULL, &(work_size), NULL, 0, NULL, NULL);
+	if (clSetKernelArg(cl->renderer_kernel, 8, sizeof(t_opt), &(rt->opt))
+		|| clEnqueueNDRangeKernel(cl->queue,
+			cl->renderer_kernel, 1, NULL, &(work_size), NULL, 0, NULL, NULL))
+		return (-1);
 	ret = clEnqueueReadBuffer(cl->queue, cl->pixel_buffer,
 						CL_TRUE, 0, work_size * 4, rt->sdl.ptr, 0, NULL, NULL);
 	return (ret);

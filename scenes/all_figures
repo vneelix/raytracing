@@ -41,11 +41,11 @@ paraboloid{
 plane{
 	center (0, 0, 80)
 	vector (0, 0, -1)
-    normal_map_file normal_mapping_kl.png
 	rgb (255, 255, 255)
 	min 60
 	max 40
 }
 scene{
     center (0, 0, -16)
+    k 0.16
 }

@@ -1,8 +1,21 @@
 #ifndef CLHEADER_H
 #define CLHEADER_H
 
-#include "quaternion.clh"
-#include "affine_transform.clh"
+float4	HamiltonProduct(float4 q1, float4 q2);
+float4	ConjugatedQuat(float4 q);
+float4	QuaternionNorm(float4 q);
+float4	ReverseQuat(float4 q);
+float4	ToQuaternion(float x, float y, float z);
+float3	Rotation(float3 object, float x, float y, float z, int reverse);
+float3	RotationAround(float3 around, float3 object, float x, float y, float z,
+		int reverse);
+float3	RotationAroundVector(float3 vec3fAxis, float3 object, float angle,
+		int reverse);
+
+float   Cofactor(float3 *m, int a, int b);
+float3  objToBasis(float3 obj, float3 orig, float3 *basis, int pointFlag);
+void    BuildBasis(float3 *basis);
+float3  DecompByBasis(float3 obj, float3 orig, float3 *basis);
 
 #define DPH 4
 #define COLOR_NUMBER 2 * ((1 << DPH) - 1) + 1
@@ -52,6 +65,9 @@ struct RT_Data {
 	uint				ambient_occlusion_buffer_size;
 
 	uint				flags;
+
+	float3				background;
+	float				diffuse;
 };
 
 struct  textr{
@@ -71,7 +87,7 @@ struct item {
 	float	radius, min, max, k;
 
 	float3	color;
-	float	reflectRatio, refractRatio, shineRatio;
+	float	reflectRatio, refractRatio, refractIndex, shineRatio;
 
 	struct textr textr;
 };
@@ -96,6 +112,9 @@ struct opt{
 	uint	ambient_occlusion_buffer_size;
 
 	uint	flags;
+
+	float3	background;
+	float	diffuse;
 };
 
 float	PlaneIntersect(global struct item *item, float3 *orig, float3 *dir);

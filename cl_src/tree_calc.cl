@@ -1,4 +1,4 @@
-#include "clheader.clh"
+#include "./cl_inc/clheader.clh"
 
 void	CreateNode(struct node *node, float3 *orig, float3 *dir, float3 *normal) {
 	if (!node) { return; }
@@ -19,17 +19,17 @@ void	GenerateTree(struct RT_Data *RT_Data, struct node *root, float *f, float3 *
 		for (int j = 0, k = 0; j != nodeNumber; j += 2, k += 1) {
 			int currNode = offset + k, nextNode = (offset ? 0 : 1 << (DPH - 1)) + j;
 			float3 orig, reflectVec3f, refractVec3f;
-			if ((obj[objIndex] != NULL) && ((obj[objIndex]->reflectRatio) || obj[objIndex]->refractRatio)) {
+			if ((obj[objIndex] != NULL) && ((obj[objIndex]->reflectRatio) || obj[objIndex]->refractIndex)) {
 				orig = node[currNode].orig + node[currNode].normal * (float)1e-2;
 				reflectVec3f = GetReflectVec(node[currNode].dir, node[currNode].normal);
 				clr[pairIndex] = CastRay(RT_Data, &orig, &reflectVec3f, (i != DPH - 1) ? node + nextNode : NULL, (i != DPH - 1) ? obj + pairIndex : NULL);
 			}
-			if ((obj[objIndex] != NULL) && obj[objIndex]->refractRatio) {
+			if ((obj[objIndex] != NULL) && obj[objIndex]->refractIndex) {
 				if (objIndex < ITEM_NUMBER) {
-					f[objIndex] = FresnelRatio(node[currNode].dir, node[currNode].normal, obj[objIndex]->refractRatio);
+					f[objIndex] = FresnelRatio(node[currNode].dir, node[currNode].normal, obj[objIndex]->refractIndex);
 				}
 				orig = node[currNode].orig - node[currNode].normal * (float)1e-2;
-				refractVec3f = GetRefractVec(node[currNode].dir, node[currNode].normal, obj[objIndex]->refractRatio);
+				refractVec3f = GetRefractVec(node[currNode].dir, node[currNode].normal, obj[objIndex]->refractIndex);
 				clr[pairIndex + 1] = CastRay(RT_Data, &orig, &refractVec3f, (i != DPH - 1) ? node + nextNode + 1 : NULL, (i != DPH - 1) ? obj + pairIndex + 1 : NULL);
 			}
 			pairIndex += 2;
@@ -48,8 +48,8 @@ void	FoldTree(float *f, float3 *clr, global struct item **obj) {
 			if ((obj[curr] != NULL) && obj[curr]->reflectRatio) {
 				clr[curr] = clr[curr] * (1.f - obj[curr]->reflectRatio) + clr[next] * obj[curr]->reflectRatio;
 			}
-			if ((obj[curr] != NULL) && obj[curr]->refractRatio) {
-				clr[curr] = clr[next] * f[curr] + clr[next + 1] * (1.f - f[curr]);
+			if ((obj[curr] != NULL) && obj[curr]->refractIndex) {
+				clr[curr] = clr[curr] * (1.f - obj[curr]->refractRatio) + (clr[next] * f[curr] + clr[next + 1] * (1.f - f[curr])) * obj[curr]->refractRatio;
 			}
 			curr += 1;
 		}
@@ -57,7 +57,7 @@ void	FoldTree(float *f, float3 *clr, global struct item **obj) {
 	if ((obj[0] != NULL) && obj[0]->reflectRatio) {
 		clr[0] = clr[0] * (1.f - obj[0]->reflectRatio) + clr[1] * obj[0]->reflectRatio;
 	}
-	if ((obj[0] != NULL) && obj[0]->refractRatio) {
-		clr[0] = clr[1] * f[0] + clr[2] * (1.f - f[0]);
+	if ((obj[0] != NULL) && obj[0]->refractIndex) {
+		clr[0] = clr[0] * (1.f - obj[0]->refractRatio) + (clr[1] * f[0] + clr[2] * (1.f - f[0])) * obj[0]->refractRatio;
 	}
 }

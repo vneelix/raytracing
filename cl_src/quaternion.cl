@@ -1,4 +1,4 @@
-#include "quaternion.clh"
+#include "./cl_inc/clheader.clh"
 
 float4	HamiltonProduct(float4 q1, float4 q2) {
 	return (float4){
