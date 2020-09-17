@@ -30,10 +30,10 @@ Full render activate when you press 'T'. In full mode you can configure some par
 - '1-2-3-4-5' Post-processing effects
 
 <figure>
+    <img src="pic/1.png" />
+    <img src="pic/2.png" />
+    <img src="pic/3.png" />
     <img src="pic/showcase.png" />
     <img src="pic/spheres2.png" />
     <img src="pic/all_figures_soft.png" />
-    <img src="1.png" />
-    <img src="2.png" />
-    <img src="3.png" />
 </figure>
