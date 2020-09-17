@@ -27,32 +27,13 @@ Full render activate when you press 'T'. In full mode you can configure some par
 - 'W' On/Off antialiasing
 - 'E' On/Off recursion (reflect, refract)
 - 'R' On/Off soft shadows
+- '1-2-3-4-5' Post-processing effects
 
 <figure>
     <img src="pic/showcase.png" />
     <img src="pic/spheres2.png" />
+    <img src="pic/all_figures_soft.png" />
+    <img src="1.png" />
+    <img src="2.png" />
+    <img src="3.png" />
 </figure>
-
-#### Ambient
-<table>
-  <tr>
-    <td>Not active</td>
-     <td>Active</td>
-  </tr>
-  <tr>
-    <td><img src="pic/all_figures_soft.png"></td>
-    <td><img src="pic/ambient.png"></td>
-  </tr>
- </table>
- 
-#### Ambient
-<table>
-  <tr>
-    <td>Not active</td>
-     <td>Active</td>
-  </tr>
-  <tr>
-    <td><img src="pic/soft_shadows.png"></td>
-    <td><img src="pic/soft_shadows_ambient.png"></td>
-  </tr>
- </table>
